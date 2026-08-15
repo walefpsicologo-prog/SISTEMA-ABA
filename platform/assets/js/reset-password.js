@@ -1,0 +1,6 @@
+import { sb } from './config.js';
+import { flash,userError,setBusy,q } from './api.js';
+let recovery=false;
+sb.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recovery=true;q('#resetStatus').textContent='Link de recuperação validado. Defina sua nova senha.'}});
+async function boot(){const{data:{session}}=await sb.auth.getSession();if(session){recovery=true;q('#resetStatus').textContent='Sessão de recuperação válida. Defina sua nova senha.'}else q('#resetStatus').textContent='Abra esta página a partir do link de recuperação enviado por e-mail.'}
+q('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget;if(!recovery)return flash('O link de recuperação não está válido nesta sessão. Solicite um novo link.','bad');if(f.password.value!==f.confirm.value)return flash('As senhas não coincidem.','bad');if(f.password.value.length<6)return flash('Use pelo menos 6 caracteres.','bad');const btn=f.querySelector('button');setBusy(btn,true,'Alterando…');const{error}=await sb.auth.updateUser({password:f.password.value});if(error){flash(userError(error),'bad');setBusy(btn,false);return}flash('Senha alterada com sucesso.','ok');setTimeout(()=>location.href='/area-aluno.html?password=updated',1000)});boot();
