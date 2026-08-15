@@ -6,6 +6,9 @@ export const CONFIG = Object.freeze({
   HERO_URL: 'https://olegdikznieawsiaqtnr.supabase.co/functions/v1/internalize-public-assets?asset=hero',
   TEA_URL: 'https://olegdikznieawsiaqtnr.supabase.co/functions/v1/internalize-public-assets?asset=tea'
 });
+const hiddenGuard=document.createElement('style');
+hiddenGuard.textContent='[hidden]{display:none!important}';
+document.head.appendChild(hiddenGuard);
 export const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
