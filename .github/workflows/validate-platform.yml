@@ -1,0 +1,40 @@
+name: Validate WT Platform
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'platform/**'
+      - '.github/workflows/validate-platform.yml'
+  pull_request:
+    paths:
+      - 'platform/**'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          set -euo pipefail
+          find platform/assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Reject production legacy references
+        run: |
+          set -euo pipefail
+          ! grep -RInE 'localhost(:3000)?|curso-aplicador-aba-wt\.vercel\.app|walef-teixeira\.vercel\.app|Gemini' platform
+      - name: Verify required production files
+        run: |
+          set -euo pipefail
+          test -f platform/index.html
+          test -f platform/area-aluno.html
+          test -f platform/admin.html
+          test -f platform/matricula.html
+          test -f platform/nova-senha.html
+          test -f platform/tea-rio.html
+          test -f platform/assets/css/style.css
+          test -f platform/assets/js/student.js
+          test -f platform/assets/js/admin.js
