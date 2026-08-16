@@ -4,14 +4,14 @@ import { esc, q } from './api.js';
 const byType=(items,type)=>items.filter(x=>x.item_type===type);
 const safeUrl=v=>{const s=String(v||'').trim();if(!s)return'';if(s.startsWith('/')||/^https:\/\//i.test(s))return s;return''};
 const arr=v=>Array.isArray(v)?v.filter(Boolean):[];
-const text=v=>v==null?'':String(v);
-const metaLabel=x=>x.period_label||x.year||x.category||'';
 const linkButton=(href,label,secondary=false)=>{const u=safeUrl(href);return u?`<a class="btn${secondary?' secondary':''}" href="${esc(u)}"${u.startsWith('https://')?' target="_blank" rel="noopener"':''}>${esc(label)}</a>`:''};
 
-function renderTimeline(items){
- const host=q('#timelineList'); if(!host)return;
- const rows=byType(items,'timeline').sort((a,b)=>(b.year||0)-(a.year||0)||(a.position||0)-(b.position||0));
- host.innerHTML=rows.length?rows.map(x=>`<article class="timeline-item"><div class="timeline-dot" aria-hidden="true"></div><div class="timeline-card"><span class="timeline-year">${esc(metaLabel(x))}</span><h3>${esc(x.title)}</h3>${x.subtitle?`<div class="timeline-sub">${esc(x.subtitle)}</div>`:''}${x.description?`<p>${esc(x.description)}</p>`:''}${x.external_url?`<div class="card-actions">${linkButton(x.external_url,'Ver referência',true)}</div>`:''}</div></article>`).join(''):'<div class="portfolio-empty">Nenhum registro cronológico foi publicado sem documentação suficiente.</div>';
+function refineProfessionalIntro(){
+ document.querySelector('.professional-nav a[href="#linha-tempo"]')?.remove();
+ q('#linha-tempo')?.remove();
+ const intro=q('#trajetoria .professional-intro');
+ if(!intro)return;
+ intro.innerHTML=`<span class="kicker">Trajetória</span><h2>Psicologia, ciência e tecnologia aplicada.</h2><p class="professional-name"><strong>Walef Lincoln de Souza Teixeira</strong></p><p class="professional-reg">Psicólogo — CRP 05/85580</p><p>Atua na interface entre Psicologia, Análise do Comportamento, formação e tecnologia aplicada. Desenvolve projetos, conteúdos e sistemas voltados à organização de dados, mensuração, supervisão e qualificação de processos profissionais.</p><p>Seu trabalho reúne prática, método científico e desenvolvimento de ferramentas digitais, com foco em precisão, análise de dados e decisões orientadas por evidências.</p><div class="actions"><a class="btn" href="#curriculo">Currículo e produção</a><a class="btn secondary" href="https://www.linkedin.com/in/walef-teixeira-psicol%C3%B3go-4b319a3ab" target="_blank" rel="noopener">LinkedIn</a></div>`;
 }
 
 function renderCredentials(items){
@@ -68,12 +68,13 @@ function renderEvidence(items){
 }
 
 async function bootPortfolio(){
- const roots=['#timelineList','#credentialList','#areaList','#projectList','#softwareList','#technicalList','#portfolioPublicationList'];
+ refineProfessionalIntro();
+ const roots=['#credentialList','#areaList','#projectList','#softwareList','#technicalList','#portfolioPublicationList'];
  if(!roots.some(s=>q(s)))return;
  try{
   const {data,error}=await sb.from('professional_portfolio').select('*').eq('status','published').order('position',{ascending:true});
   if(error)throw error;const items=data||[];
-  renderTimeline(items);renderCredentials(items);renderAreas(items);renderProjects(items);renderSoftware(items);renderTechnical(items);renderPortfolioPublications(items);renderEvidence(items);
+  renderCredentials(items);renderAreas(items);renderProjects(items);renderSoftware(items);renderTechnical(items);renderPortfolioPublications(items);renderEvidence(items);
  }catch(err){
   console.error('professional_portfolio_load_failed',err);
   roots.forEach(s=>{const el=q(s);if(el)el.innerHTML='<div class="portfolio-empty">Não foi possível carregar esta parte do portfólio agora.</div>'});
