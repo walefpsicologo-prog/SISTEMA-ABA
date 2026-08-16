@@ -8,7 +8,7 @@ export function flash(message,type='ok',timeout=5200){let el=q('#flash');if(!el)
 export function setBusy(btn,on,label='Processando…'){if(!btn)return;if(on){btn.dataset.old=btn.textContent;btn.disabled=true;btn.textContent=label}else{btn.disabled=false;btn.textContent=btn.dataset.old||btn.textContent}}
 export function salePrice(c){const now=Date.now(),start=c.sale_starts_at?new Date(c.sale_starts_at).getTime():null,end=c.sale_ends_at?new Date(c.sale_ends_at).getTime():null;const active=c.sale_price_cents!=null&&(!start||now>=start)&&(!end||now<=end);return active?c.sale_price_cents:c.regular_price_cents}
 export async function publicCourses(){const{data,error}=await sb.rpc('get_public_courses');if(error)throw error;return data||[]}
-export async function courseBySlug(slug){const{data,error}=await sb.from('courses').select('*').eq('slug',slug).eq('status','published').maybeSingle();if(error)throw error;return data}
+export async function courseBySlug(slug){const courses=await publicCourses();return courses.find(c=>c.slug===slug)||null}
 export async function courseOutline(slug){const{data,error}=await sb.rpc('get_course_outline',{p_slug:slug});if(error)throw error;return data||[]}
 export async function currentUser(){const{data:{user},error}=await sb.auth.getUser();if(error||!user)return{user:null,profile:null};const{data:profile}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();return{user,profile}}
 export async function activeEnrollments(){const{data,error}=await sb.from('enrollments').select('*,courses(*)').in('status',['active','completed']).order('created_at',{ascending:false});if(error)throw error;return data||[]}
