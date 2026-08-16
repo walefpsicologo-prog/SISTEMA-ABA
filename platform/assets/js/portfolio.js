@@ -17,10 +17,10 @@ function refineProfessionalIntro(){
  intro.innerHTML=`<span class="kicker">Trajetória</span><h2>Psicologia, ciência e tecnologia aplicada.</h2><p class="professional-name"><strong>Walef Lincoln de Souza Teixeira</strong></p><p class="professional-reg">Psicólogo — CRP 05/85580</p><p>Atua na interface entre Psicologia, Análise do Comportamento, formação e tecnologia aplicada. Desenvolve projetos, conteúdos e sistemas voltados à organização de dados, mensuração, supervisão e qualificação de processos profissionais.</p><p>Seu trabalho reúne prática, método científico e desenvolvimento de ferramentas digitais, com foco em precisão, análise de dados e decisões orientadas por evidências.</p><div class="actions"><a class="btn" href="#curriculo">Currículo e produção</a><a class="btn secondary" href="https://www.linkedin.com/in/walef-teixeira-psicol%C3%B3go-4b319a3ab" target="_blank" rel="noopener">LinkedIn</a></div>`;
 }
 
-function renderCredentials(items){
- const host=q('#credentialList'); if(!host)return;
- const rows=items.filter(x=>['credential','education','experience'].includes(x.item_type)).sort((a,b)=>(a.position||0)-(b.position||0));
- host.innerHTML=rows.length?rows.map(x=>`<article class="credential-card"><span class="kicker">${esc(x.category||x.item_type)}</span><h3>${esc(x.title)}</h3>${x.subtitle?`<p><strong>${esc(x.subtitle)}</strong></p>`:''}${x.description?`<p>${esc(x.description)}</p>`:''}${x.institution?`<p>${esc(x.institution)}</p>`:''}${x.period_label?`<p>${esc(x.period_label)}</p>`:''}${x.file_url||x.external_url?`<div class="actions">${linkButton(x.file_url,'Ver documento',true)}${linkButton(x.external_url,'Ver referência',true)}</div>`:''}</article>`).join(''):'<div class="portfolio-empty">Formações acadêmicas e experiências detalhadas ainda não foram publicadas porque não há documentação suficiente cadastrada no projeto.</div>';
+function refineCurriculum(){
+ const host=q('#curriculo .wrap');
+ if(!host)return;
+ host.innerHTML=`<div class="section-head curriculum-profile-head"><div><span class="kicker">Currículo</span><h2>Resumo profissional.</h2></div><p>Psicologia, Análise do Comportamento, formação e desenvolvimento aplicado.</p></div><div class="curriculum-summary"><p><strong>Walef Lincoln de Souza Teixeira</strong> é Psicólogo — CRP 05/85580 — com atuação na interface entre Psicologia, Análise do Comportamento, formação profissional e tecnologia aplicada.</p><p>Seu trabalho integra prática profissional, método científico e desenvolvimento de soluções para organização de dados, mensuração, supervisão e acompanhamento de processos. Desenvolve cursos, projetos e ferramentas digitais com foco em precisão, análise de dados e tomada de decisão orientada por evidências.</p><p class="curriculum-focus"><strong>Áreas de interesse:</strong> Análise do Comportamento, ABA, avaliação, mensuração, formação profissional, ciência e tecnologia aplicada.</p></div>`;
 }
 
 function renderAreas(items){
@@ -60,12 +60,13 @@ function renderEvidence(items){
 
 async function bootPortfolio(){
  refineProfessionalIntro();
- const roots=['#credentialList','#areaList','#projectList','#portfolioPublicationList'];
+ refineCurriculum();
+ const roots=['#areaList','#projectList','#portfolioPublicationList'];
  if(!roots.some(s=>q(s)))return;
  try{
   const {data,error}=await sb.from('professional_portfolio').select('*').eq('status','published').order('position',{ascending:true});
   if(error)throw error;const items=data||[];
-  renderCredentials(items);renderAreas(items);renderProjects(items);renderPortfolioPublications(items);renderEvidence(items);
+  renderAreas(items);renderProjects(items);renderPortfolioPublications(items);renderEvidence(items);
  }catch(err){
   console.error('professional_portfolio_load_failed',err);
   roots.forEach(s=>{const el=q(s);if(el)el.innerHTML='<div class="portfolio-empty">Não foi possível carregar esta parte do portfólio agora.</div>'});
