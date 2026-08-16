@@ -14,19 +14,41 @@ function refineProfessionalIntro(){
  q('#producao-tecnica')?.remove();
  const intro=q('#trajetoria .professional-intro');
  if(!intro)return;
- intro.innerHTML=`<span class="kicker">Trajetória</span><h2>Psicologia, ciência e tecnologia aplicada.</h2><p class="professional-name"><strong>Walef Lincoln de Souza Teixeira</strong></p><p class="professional-reg">Psicólogo — CRP 05/85580</p><p>Atua na interface entre Psicologia, Análise do Comportamento, formação e tecnologia aplicada. Desenvolve projetos, conteúdos e sistemas voltados à organização de dados, mensuração, supervisão e qualificação de processos profissionais.</p><p>Seu trabalho reúne prática, método científico e desenvolvimento de ferramentas digitais, com foco em precisão, análise de dados e decisões orientadas por evidências.</p><div class="actions"><a class="btn" href="#curriculo">Currículo e produção</a><a class="btn secondary" href="https://www.linkedin.com/in/walef-teixeira-psicol%C3%B3go-4b319a3ab" target="_blank" rel="noopener">LinkedIn</a></div>`;
+ intro.innerHTML=`<span class="kicker">Trajetória</span><h2>Psicologia, ciência e prática baseada em dados.</h2><p class="professional-name"><strong>Walef Lincoln de Souza Teixeira</strong></p><p class="professional-reg">Psicólogo — CRP 05/85580</p><p>Atuação em Análise do Comportamento Aplicada desde 2021, com experiência em diferentes serviços, contextos clínicos e funções de responsabilidade técnica, supervisão e formação profissional.</p><p>A trajetória também inclui produção acadêmica em Psicometria, pesquisa, avaliação comportamental, análise de dados e desenvolvimento de projetos voltados à qualificação da prática profissional.</p><div class="actions"><a class="btn" href="#curriculo">Ver currículo</a><a class="btn secondary" href="https://www.linkedin.com/in/walef-teixeira-psicol%C3%B3go-4b319a3ab" target="_blank" rel="noopener">LinkedIn</a></div>`;
 }
 
 function refineCurriculum(){
  const host=q('#curriculo .wrap');
  if(!host)return;
- host.innerHTML=`<div class="section-head curriculum-profile-head"><div><span class="kicker">Currículo</span><h2>Resumo profissional.</h2></div><p>Psicologia, Análise do Comportamento, formação e desenvolvimento aplicado.</p></div><div class="curriculum-summary"><p><strong>Walef Lincoln de Souza Teixeira</strong> é Psicólogo — CRP 05/85580 — com atuação na interface entre Psicologia, Análise do Comportamento, formação profissional e tecnologia aplicada.</p><p>Seu trabalho integra prática profissional, método científico e desenvolvimento de soluções para organização de dados, mensuração, supervisão e acompanhamento de processos. Desenvolve cursos, projetos e ferramentas digitais com foco em precisão, análise de dados e tomada de decisão orientada por evidências.</p><p class="curriculum-focus"><strong>Áreas de interesse:</strong> Análise do Comportamento, ABA, avaliação, mensuração, formação profissional, ciência e tecnologia aplicada.</p></div>`;
+ host.innerHTML=`
+ <div class="section-head"><div><span class="kicker">Currículo</span><h2>Formação, experiência e produção acadêmica.</h2></div><p>Resumo baseado no currículo profissional documentado.</p></div>
+ <div class="method-copy" style="max-width:1020px"><p><strong>Walef Lincoln de Souza Teixeira</strong> é Psicólogo — CRP 05/85580 — com atuação em Análise do Comportamento Aplicada (ABA), avaliação comportamental, coleta e análise de dados, orientação parental e escolar, supervisão, responsabilidade técnica e formação de profissionais. Atua em ABA desde 2021, com passagem por diferentes serviços e instituições.</p></div>
+ <div class="curriculum-columns">
+  <article class="curriculum-box"><span class="kicker">Formação</span><h3>Graduação e pós-graduações</h3><p><strong>Universidade Estácio de Sá (UNESA)</strong><br>Psicologia — graduação, média 9,0<br>01/2019 — 01/2026</p><p><strong>Universidade Líbano</strong><br>Neuropsicologia — pós-graduação<br>Em andamento</p><p><strong>Universidade Líbano</strong><br>Análise do Comportamento Aplicada — pós-graduação<br>Em andamento</p></article>
+  <article class="curriculum-box"><span class="kicker">Experiência ABA</span><h3>Atuação desde 2021</h3><p><strong>Luna ABA</strong> — 04/2021 a 12/2022<br><strong>Grupo Conduzir</strong> — 04/2021 a 03/2023<br><strong>Criar e Recriar</strong> — 01/2023 a 02/2024<br><strong>Recriando</strong> — 05/2023 a 03/2025<br><strong>Mediare</strong> — 03/2025 a 01/2026<br><strong>ABBR</strong> — atuação em andamento</p><p>Experiência como Acompanhante Terapêutico e Aplicador ABA, com aplicação de programas, manejo comportamental, coleta de dados e acompanhamento de metas individualizadas.</p></article>
+  <article class="curriculum-box"><span class="kicker">Responsabilidade técnica e formação</span><h3>Supervisão, equipe e ensino</h3><p><strong>CORE Terapias Integradas</strong><br>Responsável Técnico e Monitor de Formação ABA — 2025 até o presente.</p><p><strong>Autts & Cia</strong><br>Responsável Técnico e Instrutor ABA — 2025.</p><p><strong>CBI of Miami</strong> — Acompanhante Terapêutico, 01/2021 a 12/2021.<br><strong>Academia do Autismo</strong> — Aplicador ABA, 07/2023 até o presente.</p></article>
+  <article class="curriculum-box"><span class="kicker">Pesquisa e Psicometria</span><h3>Produção acadêmica</h3><p><strong>Dois artigos em Psicometria</strong> desenvolvidos na Universidade Estácio de Sá, sob supervisão de Alexandre Marques.</p><p>Participação em <strong>PIBIC em Psicometria</strong> e atuação como <strong>monitor de Psicologia Experimental</strong>.</p><p>Interesse técnico em avaliação, mensuração, análise de dados e construção de decisões profissionais sustentadas por evidências.</p></article>
+ </div>
+ <p class="portfolio-note"><strong>Competências:</strong> manejo comportamental, coleta e análise de dados, avaliação de protocolos, delineamento de casos, orientação parental e escolar e formação de equipes ABA.</p>`;
+}
+
+function addPsychometricsProduction(){
+ const section=q('#producao .wrap');
+ if(!section||q('#psychometricsProduction'))return;
+ const head=section.querySelector('.section-head');
+ const block=document.createElement('div');
+ block.id='psychometricsProduction';
+ block.className='portfolio-grid';
+ block.innerHTML=`<article class="portfolio-card"><span class="kicker">Psicometria · produção acadêmica</span><h3>Dois artigos em Psicometria</h3><p>Produção desenvolvida na Universidade Estácio de Sá, sob supervisão de Alexandre Marques, associada à participação em PIBIC em Psicometria e à monitoria em Psicologia Experimental.</p><div class="meta-line"><span>Universidade Estácio de Sá</span><span>Psicometria</span><span>PIBIC</span></div></article>`;
+ head?.insertAdjacentElement('afterend',block);
 }
 
 function renderAreas(items){
  const host=q('#areaList'); if(!host)return;
- const rows=byType(items,'area').sort((a,b)=>(a.position||0)-(b.position||0));
- host.innerHTML=rows.length?rows.map(x=>`<article class="area-card"><h3>${esc(x.title)}</h3>${x.description?`<p>${esc(x.description)}</p>`:''}</article>`).join(''):'<div class="portfolio-empty">Nenhuma área publicada.</div>';
+ const rows=byType(items,'area').filter(x=>String(x.title||'').trim().toLowerCase()!=='tecnologia aplicada').sort((a,b)=>(a.position||0)-(b.position||0));
+ const base=rows.map(x=>`<article class="area-card"><h3>${esc(x.title)}</h3>${x.description?`<p>${esc(x.description)}</p>`:''}</article>`).join('');
+ const extras=`<article class="area-card"><h3>Psicometria e pesquisa</h3><p>PIBIC em Psicometria, dois artigos desenvolvidos na Universidade Estácio de Sá e monitoria em Psicologia Experimental.</p></article><article class="area-card"><h3>Supervisão e formação ABA</h3><p>Responsabilidade técnica, monitoria, instrutoria e formação de aplicadores, com organização de registros e suporte a equipes.</p></article>`;
+ host.innerHTML=base+extras;
 }
 
 function detail(label,value){return value?`<div><b>${esc(label)}</b><span>${esc(value)}</span></div>`:''}
@@ -42,11 +64,13 @@ function pubCard(x){const author=arr(x.authors).join('; ');return `<article clas
 function renderPortfolioPublications(items){
  const host=q('#portfolioPublicationList'); if(!host)return;
  const rows=byType(items,'publication').sort((a,b)=>(b.year||0)-(a.year||0)||(a.position||0)-(b.position||0));
- const yearSel=q('#publicationYear'),catSel=q('#publicationCategory');
+ const yearSel=q('#publicationYear'),catSel=q('#publicationCategory'),filters=document.querySelector('.publication-filters');
+ if(!rows.length){if(filters)filters.style.display='none';host.innerHTML='';return}
+ if(filters)filters.style.display='flex';
  const years=[...new Set(rows.map(x=>x.year).filter(Boolean))].sort((a,b)=>b-a); const cats=[...new Set(rows.map(x=>x.category).filter(Boolean))].sort();
  if(yearSel)yearSel.innerHTML='<option value="">Todos os anos</option>'+years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join('');
  if(catSel)catSel.innerHTML='<option value="">Todas as categorias</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
- const paint=()=>{const y=yearSel?.value||'',c=catSel?.value||'';const filtered=rows.filter(x=>(!y||String(x.year)===y)&&(!c||x.category===c));host.innerHTML=filtered.length?filtered.map(pubCard).join(''):'<div class="portfolio-empty">Nenhuma produção científica/técnica com referência bibliográfica foi cadastrada nesta categoria. Os conteúdos editoriais públicos aparecem logo abaixo.</div>'};
+ const paint=()=>{const y=yearSel?.value||'',c=catSel?.value||'';const filtered=rows.filter(x=>(!y||String(x.year)===y)&&(!c||x.category===c));host.innerHTML=filtered.length?filtered.map(pubCard).join(''):''};
  yearSel?.addEventListener('change',paint);catSel?.addEventListener('change',paint);paint();
 }
 
@@ -61,6 +85,7 @@ function renderEvidence(items){
 async function bootPortfolio(){
  refineProfessionalIntro();
  refineCurriculum();
+ addPsychometricsProduction();
  const roots=['#areaList','#projectList','#portfolioPublicationList'];
  if(!roots.some(s=>q(s)))return;
  try{
