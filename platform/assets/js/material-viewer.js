@@ -36,6 +36,7 @@ function ensureViewer() {
   const dialog = document.createElement('dialog');
   dialog.id = 'wtMaterialViewer';
   dialog.className = 'wt-material-viewer';
+  dialog.setAttribute('aria-labelledby', 'wtMaterialTitle');
   dialog.innerHTML = `
     <div class="wt-material-shell">
       <header class="wt-material-head">
@@ -55,14 +56,14 @@ function ensureViewer() {
       </div>
       <main class="wt-material-stage" id="wtMaterialStage">
         <div class="wt-material-canvas-wrap" id="wtCanvasWrap"><canvas class="wt-material-canvas" id="wtPdfCanvas" hidden></canvas></div>
-        <div class="wt-material-loading" id="wtMaterialLoading" hidden><span class="wt-material-spinner"></span><strong>Carregando material…</strong><span id="wtMaterialProgress"></span></div>
-        <div class="wt-material-error" id="wtMaterialError" hidden><strong>Não foi possível abrir este material.</strong><p id="wtMaterialErrorText"></p><button type="button" id="wtMaterialRetry">Tentar novamente</button></div>
+        <div class="wt-material-loading" id="wtMaterialLoading" hidden role="status" aria-live="polite"><span class="wt-material-spinner"></span><strong>Carregando material…</strong><span id="wtMaterialProgress"></span></div>
+        <div class="wt-material-error" id="wtMaterialError" hidden role="alert"><strong>Não foi possível abrir este material.</strong><p id="wtMaterialErrorText"></p><button type="button" id="wtMaterialRetry">Tentar novamente</button></div>
       </main>
     </div>`;
   document.body.append(dialog);
 
   dialog.querySelector('#wtMaterialClose').addEventListener('click', closeViewer);
-  dialog.addEventListener('close', cleanup);
+  dialog.addEventListener('close', () => { cleanup().catch(console.error); });
   dialog.querySelector('#wtPdfPrev').addEventListener('click', () => goPage((active?.page || 1) - 1));
   dialog.querySelector('#wtPdfNext').addEventListener('click', () => goPage((active?.page || 1) + 1));
   dialog.querySelector('#wtPdfPage').addEventListener('change', (e) => goPage(Number(e.currentTarget.value)));
@@ -74,7 +75,7 @@ function ensureViewer() {
   dialog.querySelector('#wtPdfSearchBtn').addEventListener('click', searchPdf);
   dialog.querySelector('#wtPdfSearch').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); searchPdf(); } });
   dialog.querySelector('#wtMaterialRetry').addEventListener('click', () => active?.materialId && loadMaterial(active.materialId, active.title));
-  window.addEventListener('resize', debounce(() => { if (active?.pdf && active.fit) renderPage(); }, 180));
+  window.addEventListener('resize', debounce(() => { if (active?.pdf && active.fit) renderPage().catch(viewerFailure); }, 180));
 }
 
 function debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }
@@ -120,7 +121,7 @@ async function fetchBytes(materialId, onProgress) {
   const mime = (response.headers.get('content-type') || 'application/octet-stream').split(';')[0].toLowerCase();
   const disposition = response.headers.get('content-disposition') || '';
   const nameMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i) || disposition.match(/filename="([^"]+)"/i);
-  let fileName = nameMatch ? decodeURIComponent(nameMatch[1]) : 'material';
+  const fileName = nameMatch ? decodeURIComponent(nameMatch[1]) : 'material';
   const total = Number(response.headers.get('content-length')) || 0;
   if (!response.body?.getReader) return { bytes: new Uint8Array(await response.arrayBuffer()), mime, fileName };
   const reader = response.body.getReader(); const chunks = []; let received = 0;
@@ -135,7 +136,7 @@ async function fetchBytes(materialId, onProgress) {
 
 async function loadMaterial(materialId, title = 'Material') {
   ensureViewer();
-  cleanup(false);
+  await cleanup(false);
   active = { materialId, title, page: 1, scale: 1, fit: 'width', textCache: new Map(), renderTask: null };
   el('#wtMaterialTitle').textContent = title;
   el('#wtMaterialMeta').textContent = 'Acesso protegido · Plataforma Walef Teixeira';
@@ -187,13 +188,14 @@ async function renderPage() {
   const outputScale = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = Math.floor(viewport.width * outputScale); canvas.height = Math.floor(viewport.height * outputScale);
   canvas.style.width = `${Math.floor(viewport.width)}px`; canvas.style.height = `${Math.floor(viewport.height)}px`;
-  ctx.setTransform(outputScale, 0, 0, outputScale, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, viewport.width, viewport.height);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (active.renderTask) { try { active.renderTask.cancel(); } catch {} }
-  active.renderTask = page.render({ canvasContext: ctx, viewport, background: 'rgb(255,255,255)' });
+  const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+  active.renderTask = page.render({ canvasContext: ctx, transform, viewport, background: 'rgb(255,255,255)' });
   try { await active.renderTask.promise; } catch (e) { if (e?.name !== 'RenderingCancelledException') throw e; }
   if (!active || active.renderSeq !== seq) return;
   el('#wtPdfPage').value = String(active.page); el('#wtPdfPrev').disabled = active.page <= 1; el('#wtPdfNext').disabled = active.page >= active.pdf.numPages;
-  stage.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  stage.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 }
 
 function goPage(n) { if (!active?.pdf) return; const page = Math.min(active.pdf.numPages, Math.max(1, Math.round(Number(n) || 1))); if (page === active.page) return; active.page = page; renderPage().catch(viewerFailure); }
@@ -205,7 +207,7 @@ async function searchPdf() {
   if (!active?.pdf) return;
   const query = el('#wtPdfSearch').value.trim().toLocaleLowerCase('pt-BR'); if (!query) return;
   const start = active.page;
-  for (let step = 1; step <= active.pdf.numPages; step++) {
+  for (let step = 0; step < active.pdf.numPages; step++) {
     const n = ((start - 1 + step) % active.pdf.numPages) + 1;
     let text = active.textCache.get(n);
     if (text == null) { const p = await active.pdf.getPage(n); const tc = await p.getTextContent(); text = tc.items.map((x) => x.str || '').join(' ').toLocaleLowerCase('pt-BR'); active.textCache.set(n, text); }
