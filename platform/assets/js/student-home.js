@@ -15,7 +15,6 @@ async function boot(){
     auth.hidden=true;home.hidden=false;actions.hidden=false;
     q('#studentName').textContent=me.profile?.full_name||me.user.email||'';
     q('#welcomeName').textContent=(me.profile?.full_name||'Aluno').split(' ')[0];
-    q('#adminShortcut').hidden=me.profile?.role!=='admin';
     const enrollments=await activeEnrollments();
     q('#activeCoursesN').textContent=String(enrollments.length);
     q('#coursesOwned').innerHTML=enrollments.length?enrollments.map(e=>`<article class="student-course-card"><div><span class="badge-access">${esc(sourceLabel(e.source))}</span><h2>${esc(e.courses?.title||'Curso')}</h2><p>${esc(e.courses?.subtitle||e.courses?.description||'')}</p>${e.access_ends_at?`<p><strong>Acesso até:</strong> ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'}).format(new Date(e.access_ends_at))}</p>`:''}</div><div class="actions"><a class="btn" href="/curso-aluno.html?curso=${encodeURIComponent(e.course_id)}">Entrar no curso</a></div></article>`).join(''):'<div class="empty-state">Você ainda não possui matrícula ativa. Se recebeu bolsa ou cortesia, entre com o mesmo e-mail usado na liberação.</div>';
