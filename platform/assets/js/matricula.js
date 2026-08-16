@@ -45,7 +45,7 @@ q('#payBtn')?.addEventListener('click',async()=>{
   if(data?.checkout_url)return location.href=data.checkout_url;
   throw new Error('payment_unavailable');
  }catch(err){
-  if(String(err.message).includes('payment_unavailable'))flash('A matrícula online está temporariamente indisponível. Entre em contato para atendimento e formas alternativas de matrícula.','bad');
+  if(String(err.message).includes('payment_unavailable'))flash('O pagamento online ainda não está ativado. Utilize os canais oficiais de contato da plataforma para concluir a matrícula.','bad',8000);
   else flash(userError(err),'bad');
  }finally{setBusy(btn,false)}
 });
