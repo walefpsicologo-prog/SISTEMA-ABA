@@ -1,6 +1,6 @@
 import {sb} from './config.js';
-import {esc,dt,flash,userError,currentUser,activeEnrollments,publicCourses,salePrice,money,q} from './api.js?v=20260817-signup2';
-import {bindAuthBox,logout} from './auth.js?v=20260817-signup2';
+import {esc,dt,flash,userError,currentUser,activeEnrollments,publicCourses,salePrice,money,q} from './api.js?v=20260817-stable1';
+import {bindAuthBox,logout} from './auth.js?v=20260817-registerfix1';
 
 const COURSE_BUILD='20260817-stable1';
 const auth=q('#authGate'),home=q('#studentHome'),actions=q('#loggedActions');
