@@ -1,5 +1,5 @@
 import {sb} from './config.js';
-import {esc,dt,dateOnly,flash,userError,currentUser,activeEnrollments,loadCoursePrivate,invokeMaterial,setBusy,q,qa} from './api.js';
+import {esc,dt,dateOnly,flash,userError,currentUser,enrollmentForCourse,loadCoursePrivate,q,qa} from './api.js?v=20260817-recovery2';
 import {logout} from './auth.js';
 
 const C={user:null,profile:null,enrollment:null,course:null,modules:[],lessons:[],materials:[],assessments:[],events:[],progress:[]};
@@ -10,52 +10,48 @@ qa('[data-course-view]').forEach(b=>b.addEventListener('click',()=>view(b.datase
 const doneSet=()=>new Set(C.progress.filter(x=>x.completed).map(x=>x.lesson_id));
 const lessonMode=l=>({recorded:'GRAVADA',live:'AO VIVO',hybrid:'HÍBRIDA',activity:'ATIVIDADE'})[l.type]||l.type;
 
-function studyHtml(text=''){
- const lines=String(text||'').replace(/\r/g,'').split('\n');
- let html='',inList=false;
- const closeList=()=>{if(inList){html+='</ul>';inList=false}};
- for(const raw of lines){
-  const line=raw.trim();
-  if(!line){closeList();continue}
-  if(/^---+$/.test(line)){closeList();html+='<div class="study-rule"></div>';continue}
-  if(line.startsWith('### ')){closeList();html+=`<h3>${esc(line.slice(4))}</h3>`;continue}
-  if(line.startsWith('## ')){closeList();html+=`<h2>${esc(line.slice(3))}</h2>`;continue}
-  if(line.startsWith('# ')){closeList();html+=`<h2>${esc(line.slice(2))}</h2>`;continue}
-  if(/^[-*] /.test(line)){if(!inList){html+='<ul>';inList=true}html+=`<li>${esc(line.slice(2))}</li>`;continue}
-  closeList();html+=`<p>${esc(line)}</p>`;
- }
- closeList();return html;
+function guardStatus(title,text,actions=''){
+ const guard=q('#courseGuard');if(!guard)return;
+ guard.hidden=false;
+ guard.innerHTML=`<section class="auth-card"><span class="kicker">Acesso protegido</span><h1>${esc(title)}</h1><p>${esc(text)}</p>${actions}</section>`;
 }
-function studyBlock(l){const content=String(l.content||'').trim();if(!content)return'';return `<details class="lesson-study"><summary>Abrir apostila didática</summary><div class="lesson-study-body">${studyHtml(content)}</div></details>`}
+function guardError(err){
+ const message=userError(err);
+ console.error('student_course_boot_failed',err);
+ guardStatus('Não foi possível abrir o curso',message,`<div class="actions" style="margin-top:18px"><button class="btn" type="button" id="retryCourse">Tentar novamente</button><a class="btn secondary" href="/area-aluno.html">Meus cursos</a></div>`);
+ q('#retryCourse')?.addEventListener('click',()=>location.reload());
+}
 
 async function boot(){
+ const slow=setTimeout(()=>guardStatus('Ainda carregando…','A conexão está demorando mais que o normal. Se não abrir em alguns segundos, use “Tentar novamente”.','<div class="actions" style="margin-top:18px"><button class="btn" type="button" id="slowRetry">Tentar novamente</button><a class="btn secondary" href="/area-aluno.html">Meus cursos</a></div>')||q('#slowRetry')?.addEventListener('click',()=>location.reload()),14000);
  try{
+  const courseId=new URLSearchParams(location.search).get('curso');
+  if(!courseId){location.href='/area-aluno.html';return}
+  guardStatus('Abrindo seu curso…','Verificando sua sessão e sua matrícula.');
   const me=await currentUser();
   if(!me.user){location.href='/area-aluno.html';return}
   C.user=me.user;C.profile=me.profile;
-  const courseId=new URLSearchParams(location.search).get('curso');
-  if(!courseId){location.href='/area-aluno.html';return}
-  const enrollments=await activeEnrollments();
-  C.enrollment=enrollments.find(e=>e.course_id===courseId);
-  if(!C.enrollment){q('#courseGuard').innerHTML='<section class="auth-card"><span class="kicker">Acesso protegido</span><h1>Curso não liberado</h1><p>Esta conta não possui matrícula ativa para este curso.</p><a class="btn" href="/area-aluno.html">Voltar aos meus cursos</a></section>';return}
-  C.course=C.enrollment.courses;
+  guardStatus('Carregando conteúdo…','Matrícula identificada. Preparando aulas e materiais.');
+  C.enrollment=await enrollmentForCourse(courseId);
+  if(!C.enrollment){clearTimeout(slow);guardStatus('Curso não liberado','Esta conta não possui matrícula ativa para este curso.','<div class="actions" style="margin-top:18px"><a class="btn" href="/area-aluno.html">Voltar aos meus cursos</a></div>');return}
+  C.course=C.enrollment.courses||{id:courseId,title:'Curso',description:''};
   const data=await loadCoursePrivate(courseId);Object.assign(C,data);
-  const{data:progress,error}=await sb.from('lesson_progress').select('*').eq('user_id',C.user.id);
-  if(error)throw error;C.progress=progress||[];
+  try{const{data:progress,error}=await sb.from('lesson_progress').select('lesson_id,completed,completed_at,updated_at').eq('user_id',C.user.id);if(!error)C.progress=progress||[]}catch(err){console.warn('progress_load_failed',err);C.progress=[]}
+  clearTimeout(slow);
   q('#courseGuard').hidden=true;q('#courseShell').hidden=false;
   q('#sideCourseTitle').textContent=C.course.title;q('#courseTitle').textContent=C.course.title;q('#courseDescription').textContent=C.course.description||C.course.subtitle||'';
-  renderOverview();renderLessons();renderMaterials();renderAgenda();await Promise.all([renderAssessments(),renderDoubts(),renderForum()]);
+  renderOverview();renderLessons();renderMaterials();renderAgenda();
+  Promise.allSettled([renderAssessments(),renderDoubts(),renderForum()]);
   const hash=location.hash.replace('#','');if(hash&&q(`[data-course-view="${CSS.escape(hash)}"]`))view(hash);
- }catch(err){flash(userError(err),'bad')}
+ }catch(err){clearTimeout(slow);guardError(err)}
 }
 
 function renderOverview(){const done=doneSet(),pct=C.lessons.length?Math.round(done.size/C.lessons.length*100):0,next=C.events.filter(e=>new Date(e.starts_at)>new Date())[0];q('#doneLessonsN').textContent=String(done.size);q('#progressN').textContent=pct+'%';q('#nextClass').textContent=next?`${next.title} · ${dt(next.starts_at)}`:'Nenhuma atividade agendada';q('#courseOverview').innerHTML=`<article class="panel"><span class="kicker">PROGRESSO DO CURSO</span><h2>${esc(C.course.title)}</h2><div class="progress"><span style="width:${pct}%"></span></div><p>${pct}% concluído · ${done.size}/${C.lessons.length} aulas</p><button class="btn" id="continueCourse">Continuar pelas aulas</button></article>`;q('#continueCourse')?.addEventListener('click',()=>view('aulas'))}
 
-function renderLessons(){const done=doneSet();q('#lessonsArea').innerHTML=C.modules.map(m=>{const ls=C.lessons.filter(l=>l.module_id===m.id);return `<section class="module-box"><header><span class="kicker">${m.workload_hours?esc(m.workload_hours)+'H':'MÓDULO'}</span><h3>${esc(m.title)}</h3></header>${ls.map(l=>{const complete=done.has(l.id),media=l.recording_url||l.video_url;return `<article class="lesson-row"><button class="complete-btn ${complete?'done':''}" data-complete="${l.id}" aria-label="${complete?'Marcar como não concluída':'Marcar como concluída'}">${complete?'✓':''}</button><div><b>${String(l.position).padStart(2,'0')} · ${esc(l.title)}</b><div class="lesson-tags"><span>${esc(lessonMode(l))}</span>${l.duration_minutes?`<span>${l.duration_minutes} min</span>`:''}${l.content?'<span>APOSTILA</span>':''}</div>${l.description?`<p>${esc(l.description)}</p>`:''}${(l.type==='live'||l.type==='hybrid')&&l.live_starts_at?`<div class="live-strip"><strong>${dt(l.live_starts_at)}</strong>${l.live_url?`<a href="${esc(l.live_url)}" target="_blank" rel="noopener">Entrar no Google Meet →</a>`:''}</div>`:''}${media?`<a class="btn secondary small" href="${esc(media)}" target="_blank" rel="noopener">Assistir aula</a>`:(l.type==='recorded'||l.type==='hybrid'?'<span class="availability">Aula ainda não disponibilizada</span>':'')}${studyBlock(l)}</div></article>`}).join('')}</section>`}).join('')||'<div class="empty-state">Nenhuma aula publicada.</div>';qa('[data-complete]').forEach(b=>b.addEventListener('click',()=>toggleProgress(b.dataset.complete)))}
-async function toggleProgress(lessonId){const lesson=C.lessons.find(l=>l.id===lessonId);if(lesson?.completion_rule&&lesson.completion_rule!=='manual')return flash('Esta aula possui critério de conclusão controlado pelo curso.','bad');const old=C.progress.find(x=>x.lesson_id===lessonId),completed=!old?.completed;const{error}=await sb.from('lesson_progress').upsert({user_id:C.user.id,lesson_id:lessonId,completed,completed_at:completed?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_id'});if(error)return flash(userError(error),'bad');const{data}=await sb.from('lesson_progress').select('*').eq('user_id',C.user.id);C.progress=data||[];renderOverview();renderLessons()}
+function renderLessons(){const done=doneSet();q('#lessonsArea').innerHTML=C.modules.map(m=>{const ls=C.lessons.filter(l=>l.module_id===m.id);return `<section class="module-box"><header><span class="kicker">${m.workload_hours?esc(m.workload_hours)+'H':'MÓDULO'}</span><h3>${esc(m.title)}</h3></header>${ls.map(l=>{const complete=done.has(l.id),media=l.recording_url||l.video_url;return `<article class="lesson-row"><button class="complete-btn ${complete?'done':''}" data-complete="${l.id}" aria-label="${complete?'Marcar como não concluída':'Marcar como concluída'}">${complete?'✓':''}</button><div><b>${String(l.position).padStart(2,'0')} · ${esc(l.title)}</b><div class="lesson-tags"><span>${esc(lessonMode(l))}</span>${l.duration_minutes?`<span>${l.duration_minutes} min</span>`:''}<span>APOSTILA</span></div>${l.description?`<p>${esc(l.description)}</p>`:''}${(l.type==='live'||l.type==='hybrid')&&l.live_starts_at?`<div class="live-strip"><strong>${dt(l.live_starts_at)}</strong>${l.live_url?`<a href="${esc(l.live_url)}" target="_blank" rel="noopener">Entrar no Google Meet →</a>`:''}</div>`:''}${media?`<a class="btn secondary small" href="${esc(media)}" target="_blank" rel="noopener">Assistir aula</a>`:(l.type==='recorded'||l.type==='hybrid'?'<span class="availability">Aula ainda não disponibilizada</span>':'')}</div></article>`}).join('')}</section>`}).join('')||'<div class="empty-state">Nenhuma aula publicada.</div>';qa('[data-complete]').forEach(b=>b.addEventListener('click',()=>toggleProgress(b.dataset.complete)))}
+async function toggleProgress(lessonId){const lesson=C.lessons.find(l=>l.id===lessonId);if(lesson?.completion_rule&&lesson.completion_rule!=='manual')return flash('Esta aula possui critério de conclusão controlado pelo curso.','bad');const old=C.progress.find(x=>x.lesson_id===lessonId),completed=!old?.completed;const{error}=await sb.from('lesson_progress').upsert({user_id:C.user.id,lesson_id:lessonId,completed,completed_at:completed?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_id'});if(error)return flash(userError(error),'bad');const{data}=await sb.from('lesson_progress').select('lesson_id,completed,completed_at,updated_at').eq('user_id',C.user.id);C.progress=data||[];renderOverview();renderLessons()}
 
-function renderMaterials(){q('#materialsArea').innerHTML=C.materials.length?C.materials.map(m=>`<div class="resource-row"><div><span class="kicker">${m.mime_type==='application/pdf'?'PDF':'ARQUIVO'}</span><strong>${esc(m.title)}</strong></div><button class="btn secondary small" data-material="${m.id}">Abrir material</button></div>`).join(''):'<div class="empty-state">Nenhum material foi liberado neste curso.</div>';qa('[data-material]').forEach(b=>b.addEventListener('click',()=>openMaterial(b)))}
-async function openMaterial(btn){setBusy(btn,true,'Preparando…');try{const d=await invokeMaterial(btn.dataset.material);window.open(d.url,'_blank','noopener')}catch(err){flash(userError(err),'bad')}finally{setBusy(btn,false)}}
+function renderMaterials(){q('#materialsArea').innerHTML=C.materials.length?C.materials.map(m=>`<div class="resource-row"><div><span class="kicker">${m.mime_type==='application/pdf'?'PDF':'ARQUIVO'}</span><strong>${esc(m.title)}</strong></div><button class="btn secondary small" data-material="${m.id}">Abrir material</button></div>`).join(''):'<div class="empty-state">Nenhum material foi liberado neste curso.</div>'}
 function renderAgenda(){const ev=C.events.filter(e=>new Date(e.starts_at)>=new Date(Date.now()-86400000));q('#agendaArea').innerHTML=ev.length?ev.map(e=>`<div class="agenda-row"><div><span class="kicker">${dt(e.starts_at)}</span><strong>${esc(e.title)}</strong><p>${esc(e.description||'')}</p></div>${e.meeting_url?`<a class="btn secondary small" href="${esc(e.meeting_url)}" target="_blank" rel="noopener">Entrar</a>`:''}</div>`).join(''):'<div class="empty-state">Nenhum evento programado.</div>'}
 
 async function renderAssessments(){const{data:attempts}=await sb.from('assessment_attempts').select('*').eq('user_id',C.user.id).order('submitted_at',{ascending:false});const active=C.assessments.filter(a=>a.active);q('#assessmentsArea').innerHTML=active.length?active.map(a=>{const mine=(attempts||[]).filter(x=>x.assessment_id===a.id),last=mine[0];return `<article class="assessment-card"><div><span class="kicker">${esc(a.type)}</span><h3>${esc(a.title)}</h3><p>Critério interno: ${a.passing_score}% · ${a.question_count} questões${a.max_attempts?` · até ${a.max_attempts} tentativas`:''}.</p>${last?`<p><strong>Última tentativa:</strong> ${Number(last.score).toFixed(1)}% · ${dateOnly(last.submitted_at)}</p>`:''}</div><button class="btn" data-assessment="${a.id}">Iniciar avaliação</button></article>`}).join(''):'<div class="empty-state">Nenhuma avaliação está liberada neste momento.</div>';qa('[data-assessment]').forEach(b=>b.addEventListener('click',()=>startAssessment(b.dataset.assessment)))}
