@@ -1,4 +1,4 @@
-import { lessonContent, esc, flash, userError } from './api.js';
+import { lessonContent, esc, flash, userError } from './api.js?v=20260817-stable1';
 
 function renderText(text=''){
   const lines=String(text||'').replace(/\r/g,'').split('\n');let html='',list=false;
