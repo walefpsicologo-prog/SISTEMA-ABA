@@ -32,6 +32,7 @@ export function bindAuthBox(root=document){
   const btn=signupForm.querySelector('button[type=submit]');const email=normalizeEmail(signupForm.querySelector('[name=email]').value);
   if(remaining('signup',email)>0){flash('Este cadastro já foi enviado há poucos instantes. Não envie novamente. Aguarde a confirmação por e-mail.','bad',10000);return}
   mark('signup',email);setBusy(btn,true,'Criando cadastro…');
+  const waitHint=setTimeout(()=>{if(btn.disabled)btn.textContent='Ainda processando… não envie novamente'},8000);
   try{
    const data=await signup({name:signupForm.querySelector('[name=name]').value,email,password:signupForm.querySelector('[name=password]').value});
    loginForm.querySelector('[name=email]').value=email;
@@ -43,7 +44,7 @@ export function bindAuthBox(root=document){
    const msg=String(err?.message||'').toLowerCase();const code=String(err?.code||'').toLowerCase();
    if(msg.includes('rate limit')||msg.includes('too many requests')||code.includes('over_email_send_rate_limit'))tab(false);
    flash(authMessage(err),'bad',14000);
-  }finally{setBusy(btn,false)}
+  }finally{clearTimeout(waitHint);setBusy(btn,false)}
  });
  forgot?.addEventListener('click',e=>{e.preventDefault();if(forgotBox){forgotBox.hidden=false;forgotBox.querySelector('[name=email]').value=loginForm.querySelector('[name=email]').value||''}});
  forgotBox?.addEventListener('submit',async e=>{e.preventDefault();const btn=forgotBox.querySelector('button[type=submit]');setBusy(btn,true,'Enviando…');try{await requestPasswordReset(forgotBox.querySelector('[name=email]').value);flash('Se houver uma conta com esse e-mail, enviaremos as instruções para redefinição. Não solicite novamente nos próximos minutos.','ok',10000);forgotBox.hidden=true}catch(err){const s=String(err?.message||'');flash(s==='recovery_cooldown'?'Aguarde antes de solicitar outro e-mail de recuperação.':authMessage(err),'bad',10000)}finally{setBusy(btn,false)}});
