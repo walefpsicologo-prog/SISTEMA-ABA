@@ -10,6 +10,24 @@ qa('[data-course-view]').forEach(b=>b.addEventListener('click',()=>view(b.datase
 const doneSet=()=>new Set(C.progress.filter(x=>x.completed).map(x=>x.lesson_id));
 const lessonMode=l=>({recorded:'GRAVADA',live:'AO VIVO',hybrid:'HÍBRIDA',activity:'ATIVIDADE'})[l.type]||l.type;
 
+function studyHtml(text=''){
+ const lines=String(text||'').replace(/\r/g,'').split('\n');
+ let html='',inList=false;
+ const closeList=()=>{if(inList){html+='</ul>';inList=false}};
+ for(const raw of lines){
+  const line=raw.trim();
+  if(!line){closeList();continue}
+  if(/^---+$/.test(line)){closeList();html+='<div class="study-rule"></div>';continue}
+  if(line.startsWith('### ')){closeList();html+=`<h3>${esc(line.slice(4))}</h3>`;continue}
+  if(line.startsWith('## ')){closeList();html+=`<h2>${esc(line.slice(3))}</h2>`;continue}
+  if(line.startsWith('# ')){closeList();html+=`<h2>${esc(line.slice(2))}</h2>`;continue}
+  if(/^[-*] /.test(line)){if(!inList){html+='<ul>';inList=true}html+=`<li>${esc(line.slice(2))}</li>`;continue}
+  closeList();html+=`<p>${esc(line)}</p>`;
+ }
+ closeList();return html;
+}
+function studyBlock(l){const content=String(l.content||'').trim();if(!content)return'';return `<details class="lesson-study"><summary>Abrir apostila didática</summary><div class="lesson-study-body">${studyHtml(content)}</div></details>`}
+
 async function boot(){
  try{
   const me=await currentUser();
@@ -33,7 +51,7 @@ async function boot(){
 
 function renderOverview(){const done=doneSet(),pct=C.lessons.length?Math.round(done.size/C.lessons.length*100):0,next=C.events.filter(e=>new Date(e.starts_at)>new Date())[0];q('#doneLessonsN').textContent=String(done.size);q('#progressN').textContent=pct+'%';q('#nextClass').textContent=next?`${next.title} · ${dt(next.starts_at)}`:'Nenhuma atividade agendada';q('#courseOverview').innerHTML=`<article class="panel"><span class="kicker">PROGRESSO DO CURSO</span><h2>${esc(C.course.title)}</h2><div class="progress"><span style="width:${pct}%"></span></div><p>${pct}% concluído · ${done.size}/${C.lessons.length} aulas</p><button class="btn" id="continueCourse">Continuar pelas aulas</button></article>`;q('#continueCourse')?.addEventListener('click',()=>view('aulas'))}
 
-function renderLessons(){const done=doneSet();q('#lessonsArea').innerHTML=C.modules.map(m=>{const ls=C.lessons.filter(l=>l.module_id===m.id);return `<section class="module-box"><header><span class="kicker">${m.workload_hours?esc(m.workload_hours)+'H':'MÓDULO'}</span><h3>${esc(m.title)}</h3></header>${ls.map(l=>{const complete=done.has(l.id),media=l.recording_url||l.video_url;return `<article class="lesson-row"><button class="complete-btn ${complete?'done':''}" data-complete="${l.id}" aria-label="${complete?'Marcar como não concluída':'Marcar como concluída'}">${complete?'✓':''}</button><div><b>${String(l.position).padStart(2,'0')} · ${esc(l.title)}</b><div class="lesson-tags"><span>${esc(lessonMode(l))}</span>${l.duration_minutes?`<span>${l.duration_minutes} min</span>`:''}</div>${l.description?`<p>${esc(l.description)}</p>`:''}${(l.type==='live'||l.type==='hybrid')&&l.live_starts_at?`<div class="live-strip"><strong>${dt(l.live_starts_at)}</strong>${l.live_url?`<a href="${esc(l.live_url)}" target="_blank" rel="noopener">Entrar no Google Meet →</a>`:''}</div>`:''}${media?`<a class="btn secondary small" href="${esc(media)}" target="_blank" rel="noopener">Assistir aula</a>`:(l.type==='recorded'||l.type==='hybrid'?'<span class="availability">Aula ainda não disponibilizada</span>':'')}</div></article>`}).join('')}</section>`}).join('')||'<div class="empty-state">Nenhuma aula publicada.</div>';qa('[data-complete]').forEach(b=>b.addEventListener('click',()=>toggleProgress(b.dataset.complete)))}
+function renderLessons(){const done=doneSet();q('#lessonsArea').innerHTML=C.modules.map(m=>{const ls=C.lessons.filter(l=>l.module_id===m.id);return `<section class="module-box"><header><span class="kicker">${m.workload_hours?esc(m.workload_hours)+'H':'MÓDULO'}</span><h3>${esc(m.title)}</h3></header>${ls.map(l=>{const complete=done.has(l.id),media=l.recording_url||l.video_url;return `<article class="lesson-row"><button class="complete-btn ${complete?'done':''}" data-complete="${l.id}" aria-label="${complete?'Marcar como não concluída':'Marcar como concluída'}">${complete?'✓':''}</button><div><b>${String(l.position).padStart(2,'0')} · ${esc(l.title)}</b><div class="lesson-tags"><span>${esc(lessonMode(l))}</span>${l.duration_minutes?`<span>${l.duration_minutes} min</span>`:''}${l.content?'<span>APOSTILA</span>':''}</div>${l.description?`<p>${esc(l.description)}</p>`:''}${(l.type==='live'||l.type==='hybrid')&&l.live_starts_at?`<div class="live-strip"><strong>${dt(l.live_starts_at)}</strong>${l.live_url?`<a href="${esc(l.live_url)}" target="_blank" rel="noopener">Entrar no Google Meet →</a>`:''}</div>`:''}${media?`<a class="btn secondary small" href="${esc(media)}" target="_blank" rel="noopener">Assistir aula</a>`:(l.type==='recorded'||l.type==='hybrid'?'<span class="availability">Aula ainda não disponibilizada</span>':'')}${studyBlock(l)}</div></article>`}).join('')}</section>`}).join('')||'<div class="empty-state">Nenhuma aula publicada.</div>';qa('[data-complete]').forEach(b=>b.addEventListener('click',()=>toggleProgress(b.dataset.complete)))}
 async function toggleProgress(lessonId){const lesson=C.lessons.find(l=>l.id===lessonId);if(lesson?.completion_rule&&lesson.completion_rule!=='manual')return flash('Esta aula possui critério de conclusão controlado pelo curso.','bad');const old=C.progress.find(x=>x.lesson_id===lessonId),completed=!old?.completed;const{error}=await sb.from('lesson_progress').upsert({user_id:C.user.id,lesson_id:lessonId,completed,completed_at:completed?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:'user_id,lesson_id'});if(error)return flash(userError(error),'bad');const{data}=await sb.from('lesson_progress').select('*').eq('user_id',C.user.id);C.progress=data||[];renderOverview();renderLessons()}
 
 function renderMaterials(){q('#materialsArea').innerHTML=C.materials.length?C.materials.map(m=>`<div class="resource-row"><div><span class="kicker">${m.mime_type==='application/pdf'?'PDF':'ARQUIVO'}</span><strong>${esc(m.title)}</strong></div><button class="btn secondary small" data-material="${m.id}">Abrir material</button></div>`).join(''):'<div class="empty-state">Nenhum material foi liberado neste curso.</div>';qa('[data-material]').forEach(b=>b.addEventListener('click',()=>openMaterial(b)))}
