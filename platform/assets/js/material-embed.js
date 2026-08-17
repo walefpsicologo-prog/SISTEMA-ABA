@@ -1,4 +1,4 @@
-import { invokeMaterial, flash, userError } from './api.js';
+import { invokeMaterial, flash, userError } from './api.js?v=20260817-stable1';
 import { sb } from './config.js';
 
 let dialog=null, frame=null, titleEl=null, fullEl=null, downloadEl=null;
