@@ -1,5 +1,5 @@
 import { sb, CONFIG } from './config.js';
-export const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 export const money=c=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(c)||0)/100);
 export const dt=v=>v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)):'—';
 export const dateOnly=v=>v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'}).format(new Date(v)):'—';
@@ -17,6 +17,10 @@ const sessionUsable=session=>!!session&&(!session.expires_at||(Number(session.ex
 async function loadProfile(userId){
  try{const r=await timed(sb.from('profiles').select('*').eq('id',userId).maybeSingle(),6000,'profile_timeout');return r.error?null:(r.data||null)}
  catch(err){console.warn('profile_load_failed',err);return null}
+}
+async function optionalData(promise,ms,code){
+ try{const r=await timed(promise,ms,code);if(r?.error){console.warn(code,r.error);return[]}return r?.data||[]}
+ catch(err){console.warn(code,err);return[]}
 }
 export function flash(message,type='ok',timeout=5200){let el=q('#flash');if(!el){el=document.createElement('div');el.id='flash';document.body.append(el)}el.textContent=message;el.className='flash '+type;el.hidden=false;clearTimeout(window.__wtFlash);window.__wtFlash=setTimeout(()=>el.hidden=true,timeout)}
 export function setBusy(btn,on,label='Processando…'){if(!btn)return;if(on){btn.dataset.old=btn.textContent;btn.disabled=true;btn.textContent=label}else{btn.disabled=false;btn.textContent=btn.dataset.old||btn.textContent}}
@@ -36,19 +40,20 @@ export async function currentUser(){
 export async function activeEnrollments(){const{data,error}=await timed(sb.from('enrollments').select('*,courses(*)').in('status',['active','completed']).order('created_at',{ascending:false}),10000,'enrollments_timeout');if(error)throw error;return data||[]}
 export async function enrollmentForCourse(courseId){const{data,error}=await timed(sb.from('enrollments').select('*,courses(*)').eq('course_id',courseId).in('status',['active','completed']).order('created_at',{ascending:false}).limit(1).maybeSingle(),10000,'enrollment_timeout');if(error)throw error;return data||null}
 export async function loadCoursePrivate(courseId){
- const [{data:mods,error:me},{data:mats,error:ma},{data:assess,error:ae},{data:events,error:ee}]=await Promise.all([
-  timed(sb.from('course_modules').select('id,course_id,title,position,workload_hours').eq('course_id',courseId).order('position'),12000,'modules_timeout'),
-  timed(sb.from('materials').select('id,course_id,lesson_id,title,file_url,mime_type,visibility,position,storage_path,published').eq('course_id',courseId).eq('published',true).order('position'),12000,'materials_timeout'),
-  timed(sb.from('assessments').select('id,course_id,title,type,passing_score,question_count,max_attempts,active,created_at').eq('course_id',courseId).order('created_at'),12000,'assessments_timeout'),
-  timed(sb.from('calendar_events').select('id,course_id,title,description,starts_at,meeting_url').eq('course_id',courseId).order('starts_at'),12000,'events_timeout')
+ const modResp=await timed(sb.from('course_modules').select('id,course_id,title,position,workload_hours').eq('course_id',courseId).order('position'),12000,'modules_timeout');
+ if(modResp.error)throw modResp.error;
+ const modules=modResp.data||[];
+ const [materials,assessments,events]=await Promise.all([
+  optionalData(sb.from('materials').select('id,course_id,lesson_id,title,file_url,mime_type,visibility,position,storage_path,published').eq('course_id',courseId).eq('published',true).order('position'),10000,'materials_timeout'),
+  optionalData(sb.from('assessments').select('id,course_id,title,type,passing_score,question_count,max_attempts,active,created_at').eq('course_id',courseId).order('created_at'),10000,'assessments_timeout'),
+  optionalData(sb.from('calendar_events').select('id,course_id,title,description,starts_at,meeting_url').eq('course_id',courseId).order('starts_at'),10000,'events_timeout')
  ]);
- if(me)throw me;if(ma)throw ma;if(ae)throw ae;if(ee)throw ee;
- const mids=(mods||[]).map(x=>x.id);let lessons=[];
+ const mids=modules.map(x=>x.id);let lessons=[];
  if(mids.length){
-  const{data,error}=await timed(sb.from('lessons').select('id,module_id,position,title,type,duration_minutes,description,recording_url,video_url,live_starts_at,live_url,completion_rule,published').in('module_id',mids).eq('published',true).order('position'),12000,'lessons_timeout');
-  if(error)throw error;lessons=data||[];
+  const lessonResp=await timed(sb.from('lessons').select('id,module_id,position,title,type,duration_minutes,description,recording_url,video_url,live_starts_at,live_url,completion_rule,published').in('module_id',mids).eq('published',true).order('position'),12000,'lessons_timeout');
+  if(lessonResp.error)throw lessonResp.error;lessons=lessonResp.data||[];
  }
- return{modules:mods||[],lessons,materials:mats||[],assessments:assess||[],events:events||[]}
+ return{modules,lessons,materials,assessments,events}
 }
 export async function lessonContent(lessonId){const{data,error}=await timed(sb.from('lessons').select('id,content').eq('id',lessonId).maybeSingle(),12000,'lesson_content_timeout');if(error)throw error;return String(data?.content||'')}
 export async function invokeMaterial(materialId){const{data,error}=await timed(sb.functions.invoke('material-url',{body:{material_id:materialId}}),15000,'material_timeout');if(error){let code='';try{const ctx=error.context;const response=ctx?.clone?ctx.clone():ctx;const payload=await response?.json?.();code=payload?.error||''}catch{}if(code)throw new Error(code);throw error}if(data?.error)throw new Error(data.error);return data}
