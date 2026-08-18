@@ -5,6 +5,7 @@ export const dt=v=>v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyl
 export const dateOnly=v=>v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'}).format(new Date(v)):'—';
 export const q=s=>document.querySelector(s); export const qa=s=>[...document.querySelectorAll(s)];
 const timed=(promise,ms=12000,code='network_timeout')=>Promise.race([Promise.resolve(promise),new Promise((_,reject)=>setTimeout(()=>reject(new Error(code)),ms))]);
+const uniqueBy=(rows,keyOf)=>{const seen=new Set();return (rows||[]).filter(row=>{const key=String(keyOf(row)||'');if(!key||seen.has(key))return false;seen.add(key);return true})};
 function cachedSession(){
  try{
   const ref=new URL(CONFIG.SUPABASE_URL).hostname.split('.')[0];
@@ -25,7 +26,7 @@ async function optionalData(promise,ms,code){
 export function flash(message,type='ok',timeout=5200){let el=q('#flash');if(!el){el=document.createElement('div');el.id='flash';document.body.append(el)}el.textContent=message;el.className='flash '+type;el.hidden=false;clearTimeout(window.__wtFlash);window.__wtFlash=setTimeout(()=>el.hidden=true,timeout)}
 export function setBusy(btn,on,label='Processando…'){if(!btn)return;if(on){btn.dataset.old=btn.textContent;btn.disabled=true;btn.textContent=label}else{btn.disabled=false;btn.textContent=btn.dataset.old||btn.textContent}}
 export function salePrice(c){const now=Date.now(),start=c.sale_starts_at?new Date(c.sale_starts_at).getTime():null,end=c.sale_ends_at?new Date(c.sale_ends_at).getTime():null;const active=c.sale_price_cents!=null&&(!start||now>=start)&&(!end||now<=end);return active?c.sale_price_cents:c.regular_price_cents}
-export async function publicCourses(){const{data,error}=await timed(sb.rpc('get_public_courses'));if(error)throw error;return data||[]}
+export async function publicCourses(){const{data,error}=await timed(sb.rpc('get_public_courses'));if(error)throw error;return uniqueBy(data,c=>c.id||c.slug)}
 export async function courseBySlug(slug){const courses=await publicCourses();return courses.find(c=>c.slug===slug)||null}
 export async function courseOutline(slug){const{data,error}=await timed(sb.rpc('get_course_outline',{p_slug:slug}));if(error)throw error;return data||[]}
 export async function currentUser(){
@@ -37,8 +38,8 @@ export async function currentUser(){
  if(!user)return{user:null,profile:null};
  return{user,profile:await loadProfile(user.id)};
 }
-export async function activeEnrollments(){const{data,error}=await timed(sb.from('enrollments').select('*,courses(*)').in('status',['active','completed']).order('created_at',{ascending:false}),10000,'enrollments_timeout');if(error)throw error;return data||[]}
-export async function enrollmentForCourse(courseId){const{data,error}=await timed(sb.from('enrollments').select('*,courses(*)').eq('course_id',courseId).in('status',['active','completed']).order('created_at',{ascending:false}).limit(1).maybeSingle(),10000,'enrollment_timeout');if(error)throw error;return data||null}
+export async function activeEnrollments(){const{data,error}=await timed(sb.from('enrollments').select('*,courses(*)').in('status',['active','completed']).order('created_at',{ascending:false}),10000,'enrollments_timeout');if(error)throw error;return uniqueBy(data,e=>e.course_id||e.id)}
+export async function enrollmentForCourse(courseId){const{data,error}=await timed(sb.from('enrollments').select('*,courses(*)').eq('course_id',courseId).in('status',['active','completed']).order('created_at',{ascending:false}).limit(1).maybeSingle(),10000,'enrollments_timeout');if(error)throw error;return data||null}
 export async function loadCoursePrivate(courseId){
  const modResp=await timed(sb.from('course_modules').select('id,course_id,title,position,workload_hours').eq('course_id',courseId).order('position'),12000,'modules_timeout');
  if(modResp.error)throw modResp.error;
