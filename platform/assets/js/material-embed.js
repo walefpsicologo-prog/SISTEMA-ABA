@@ -1,5 +1,6 @@
 import { invokeMaterial, flash, userError } from './api.js?v=20260817-stable1';
 import { sb } from './config.js';
+import { materialCoverHTML } from './editorial-covers.js';
 
 let dialog=null, frame=null, titleEl=null, fullEl=null, downloadEl=null;
 const isMobile=()=>window.matchMedia('(max-width:760px)').matches;
@@ -46,8 +47,7 @@ async function enhanceRows(){
   if(ids.length){const {data}=await sb.from('materials').select('id,file_url,mime_type').in('id',ids);map=new Map((data||[]).map(x=>[x.id,x]))}
   rows.forEach(row=>{
     const open=row.querySelector('[data-material]');const id=open?.dataset.material;if(!id)return;row.dataset.wtEnhanced='1';row.classList.add('wt-resource-card');
-    const info=row.querySelector(':scope > div');const mat=map.get(id);const cover=document.createElement('div');cover.className='wt-resource-cover';const thumb=thumbUrl(mat?.file_url);
-    if(thumb){const img=document.createElement('img');img.alt='Capa do material didático';img.loading='lazy';img.src=thumb;img.addEventListener('error',()=>{cover.innerHTML='<div class="wt-resource-placeholder"><b>WT</b><span>Material didático</span></div>'},{once:true});cover.append(img)}else cover.innerHTML='<div class="wt-resource-placeholder"><b>WT</b><span>Material didático</span></div>';
+    const info=row.querySelector(':scope > div');const cover=document.createElement('div');cover.className='wt-resource-cover';const title=info?.querySelector('strong')?.textContent?.trim()||'Material didático';cover.innerHTML=materialCoverHTML(title);
     const actions=document.createElement('div');actions.className='wt-resource-actions';open.textContent='Abrir material';open.className='btn secondary small';
     const full=document.createElement('button');full.type='button';full.className='btn secondary small';full.dataset.materialFull=id;full.textContent='Tela cheia';
     const dl=document.createElement('button');dl.type='button';dl.className='btn secondary small';dl.dataset.materialDownload=id;dl.textContent='Baixar PDF';
