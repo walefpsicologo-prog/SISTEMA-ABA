@@ -6,15 +6,17 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Sistema ABA | Walef Teixeira</title>
 <link rel="stylesheet" href="/assets/css/sistema-aba.css">
+<link rel="stylesheet" href="/assets/css/sistema-aba-brand.css">
 </head>
 <body class="aba-login-page">
 <main class="aba-login-card">
   <a href="/" class="aba-login-brand" style="text-decoration:none">
-    <span class="aba-mark">WT</span>
-    <span><h1>Sistema ABA</h1><p>Walef Teixeira · área clínica protegida</p></span>
+    <span class="aba-site-logo" aria-hidden="true"><img src="https://walef-teixeira-oficial.vercel.app/assets/media/walef-logo.jpg" alt="" width="48" height="48"></span>
+    <span><h1>Walef Teixeira</h1><p>Psicólogo · CRP 05/85580</p></span>
   </a>
-  <h2 style="margin:0;color:#153f5a;font-size:22px">Acesso clínico</h2>
-  <p style="font-size:12px;line-height:1.55;color:#647984">Prontuários, avaliações, protocolos, programas, aplicações, supervisões e monitoramento. O acesso depende de vínculo profissional ativo.</p>
+  <span class="aba-product-kicker">Sistema ABA · área clínica protegida</span>
+  <h2 style="margin:0;font-size:22px">Acesso clínico</h2>
+  <p style="font-size:12px;line-height:1.55;color:#646d7e">Prontuários, avaliações, protocolos, programas, aplicações, supervisões e monitoramento. O acesso depende de vínculo profissional ativo.</p>
   <form id="abaLoginForm" class="aba-form" autocomplete="on">
     <div class="aba-field"><label for="abaEmail">E-mail</label><input id="abaEmail" name="email" type="email" autocomplete="username" required></div>
     <div class="aba-field"><label for="abaPassword">Senha</label><input id="abaPassword" name="password" type="password" autocomplete="current-password" required></div>
@@ -27,7 +29,7 @@
   </div>
   <p class="aba-login-note">Dados clínicos não são exibidos publicamente. O módulo utiliza autenticação do Supabase, RLS por vínculo profissional e trilha de auditoria.</p>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <script type="module" src="/assets/js/sistema-aba-login.js"></script>
 </body>
 </html>
