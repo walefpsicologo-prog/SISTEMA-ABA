@@ -1,7 +1,7 @@
 import { sb } from './config.js';
 
 const $=s=>document.querySelector(s);
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
 let protocols=[];
 let criteria=[];
 let loaded=false;
@@ -31,7 +31,7 @@ function renderRows(protocolId){
   const rows=criteria.filter(c=>c.protocol_id===protocolId)
     .filter(c=>!domain||c.domain===domain)
     .filter(c=>!search||`${c.criterion_code||''} ${c.domain||''} ${c.title||''} ${c.operational_definition||''}`.toLowerCase().includes(search));
-  $('#abaCriteriaVisible').textContent=`${rows.length} visíveis`;
+  const visible=$('#abaCriteriaVisible');if(visible)visible.textContent=`${rows.length} visíveis`;
   host.innerHTML=rows.map(c=>`<tr>
     <td><b>${esc(c.criterion_code||'—')}</b></td>
     <td>${esc(c.domain||'—')}</td>
@@ -78,7 +78,6 @@ async function enhanceProtocols(){
       }
     }
     if(!view.querySelector('#abaProtocolDetail')){const d=document.createElement('div');d.id='abaProtocolDetail';view.appendChild(d)}
-    if(activeProtocolId&&view.querySelector('#abaProtocolDetail'))openProtocol(activeProtocolId);
   }catch(err){console.error('Falha ao carregar matriz de critérios',err)}finally{enhancing=false}
 }
 
