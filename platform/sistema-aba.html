@@ -6,11 +6,15 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Sistema ABA | Walef Teixeira</title>
 <link rel="stylesheet" href="/assets/css/sistema-aba.css">
+<link rel="stylesheet" href="/assets/css/sistema-aba-brand.css">
 </head>
 <body>
 <div class="aba-shell">
   <aside class="aba-sidebar aba-no-print">
-    <div class="aba-brand"><span class="aba-mark">WT</span><div><h1>Sistema ABA</h1><p>Supervisor · Aplicador · Monitor</p></div></div>
+    <div class="aba-brand">
+      <span class="aba-site-logo" aria-hidden="true"><img src="https://walef-teixeira-oficial.vercel.app/assets/media/walef-logo.jpg" alt="" width="44" height="44"></span>
+      <div><h1>Walef Teixeira</h1><p>Psicólogo · CRP 05/85580</p><div class="aba-brand-product">Sistema ABA</div></div>
+    </div>
     <div class="aba-userbox"><b id="abaUserName">Carregando acesso…</b><span id="abaUserRole">—</span></div>
     <nav class="aba-nav" id="abaNav">
       <button class="active" data-view="dashboard">Painel clínico</button>
@@ -34,8 +38,8 @@
 
   <main class="aba-main">
     <header class="aba-topbar aba-no-print">
-      <div><h2 id="abaViewTitle">Painel clínico</h2><p id="abaViewSubtitle">Avaliar → planejar → aplicar → monitorar → reavaliar.</p></div>
-      <div class="aba-top-actions"><select id="abaActiveClient" class="aba-field" style="min-width:220px;padding:9px;border:1px solid #c5d3d9;border-radius:8px"><option value="">Selecionar cliente</option></select><button class="aba-btn secondary" id="abaRefresh">Atualizar</button></div>
+      <div><span class="aba-product-kicker">Walef Teixeira · Sistema ABA</span><h2 id="abaViewTitle">Painel clínico</h2><p id="abaViewSubtitle">Avaliar → planejar → aplicar → monitorar → reavaliar.</p></div>
+      <div class="aba-top-actions"><select id="abaActiveClient" class="aba-field" style="min-width:220px;padding:9px;border:1px solid #c9cfda;border-radius:6px"><option value="">Selecionar cliente</option></select><button class="aba-btn secondary" id="abaRefresh">Atualizar</button></div>
     </header>
 
     <section id="abaView-dashboard" class="aba-view active"></section>
@@ -54,7 +58,8 @@
 </div>
 <div class="aba-modal" id="abaModal" role="dialog" aria-modal="true" aria-labelledby="abaModalTitle"><div class="aba-modal-box"><h3 id="abaModalTitle">Cadastro</h3><div id="abaModalBody"></div><div class="aba-modal-actions"><button class="aba-btn secondary" id="abaModalCancel">Cancelar</button><button class="aba-btn" id="abaModalSave">Salvar</button></div></div></div>
 <div class="aba-flash" id="abaFlash" aria-live="polite"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <script type="module" src="/assets/js/sistema-aba.js"></script>
+<script type="module" src="/assets/js/sistema-aba-enhancements.js"></script>
 </body>
 </html>
