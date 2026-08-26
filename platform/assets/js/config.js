@@ -1,7 +1,12 @@
+const EDGE_SITE = 'https://olegdikznieawsiaqtnr.supabase.co/functions/v1/wt-site';
+const VERCEL_SITE = 'https://walef-teixeira-oficial.vercel.app';
+const runningOnEdgeSite = typeof location !== 'undefined' && location.pathname.includes('/functions/v1/wt-site');
+
 export const CONFIG = Object.freeze({
   SUPABASE_URL: 'https://olegdikznieawsiaqtnr.supabase.co',
   SUPABASE_KEY: 'sb_publishable_XYsGEZSA51XFX-66Cc9Hpw_UYkHXk5i',
-  SITE_URL: 'https://walef-teixeira-oficial.vercel.app',
+  SITE_URL: runningOnEdgeSite ? EDGE_SITE : VERCEL_SITE,
+  EDGE_SITE_URL: EDGE_SITE,
   DEFAULT_COURSE_SLUG: 'formacao-aplicador-aba',
   HERO_URL: 'https://olegdikznieawsiaqtnr.supabase.co/functions/v1/internalize-public-assets?asset=hero',
   TEA_URL: 'https://olegdikznieawsiaqtnr.supabase.co/functions/v1/internalize-public-assets?asset=tea'
