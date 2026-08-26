@@ -1,10 +1,11 @@
 import { CONFIG, sb } from './config.js';
 import { currentUser, flash, setBusy, userError } from './api.js?v=20260817-stable1';
 
-const BUILD='20260817-registerfix1';
+const BUILD='20260826-production1';
 const COOLDOWN_MS=120000;
 const FORM_STARTED_AT=Date.now();
 const normalizeEmail=v=>String(v||'').trim().toLowerCase();
+const publicUrl=path=>`${CONFIG.SITE_URL}${String(path||'').startsWith('/')?'':'/'}${path||''}`;
 function stampKey(kind,email){return `wt_${kind}_${normalizeEmail(email)}`}
 function remaining(kind,email){try{const ts=Number(localStorage.getItem(stampKey(kind,email))||0);return Math.max(0,COOLDOWN_MS-(Date.now()-ts))}catch{return 0}}
 function mark(kind,email){try{localStorage.setItem(stampKey(kind,email),String(Date.now()))}catch{}}
@@ -17,7 +18,7 @@ function authMessage(err){
  if(code.includes('invalid_email'))return'Informe um e-mail válido.';
  if(code.includes('invalid_name'))return'Informe seu nome completo.';
  if(code.includes('invalid_timing'))return'Aguarde alguns segundos e envie o cadastro novamente.';
- if(code.includes('email rate limit')||code.includes('too many requests')||code.includes('over_email_send_rate_limit'))return'O serviço de e-mail está temporariamente limitado. O cadastro principal não depende mais desse envio; tente novamente nesta página atualizada.';
+ if(code.includes('email rate limit')||code.includes('too many requests')||code.includes('over_email_send_rate_limit'))return'O serviço de e-mail está temporariamente limitado. Aguarde e tente novamente.';
  return userError(err);
 }
 async function jsonFetch(url,options,ms=16000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{return await fetch(url,{...options,signal:controller.signal})}finally{clearTimeout(timer)}}
@@ -29,15 +30,16 @@ export async function signup({name,email,password,website=''}){
  if(!response.ok){const err=new Error(payload?.error||`register_http_${response.status}`);err.code=payload?.error||'';throw err}
  return payload;
 }
-export async function resendSignup(email){const e=normalizeEmail(email);if(remaining('resend',e)>0)throw new Error('resend_cooldown');mark('resend',e);const{error}=await sb.auth.resend({type:'signup',email:e,options:{emailRedirectTo:CONFIG.SITE_URL+`/area-aluno.html?v=${BUILD}`}});if(error)throw error}
-export async function requestPasswordReset(email){const e=normalizeEmail(email);if(remaining('recovery',e)>0)throw new Error('recovery_cooldown');mark('recovery',e);const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:CONFIG.SITE_URL+'/nova-senha.html'});if(error)throw error}
-export async function logout(){try{await sb.auth.signOut()}finally{location.href=`/area-aluno.html?v=${BUILD}`}}
+export async function resendSignup(email){const e=normalizeEmail(email);if(remaining('resend',e)>0)throw new Error('resend_cooldown');mark('resend',e);const{error}=await sb.auth.resend({type:'signup',email:e,options:{emailRedirectTo:publicUrl(`/area-aluno.html?v=${BUILD}`)}});if(error)throw error}
+export async function requestPasswordReset(email){const e=normalizeEmail(email);if(remaining('recovery',e)>0)throw new Error('recovery_cooldown');mark('recovery',e);const{error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:publicUrl('/nova-senha.html')});if(error)throw error}
+export async function logout(){try{await sb.auth.signOut()}finally{location.href=publicUrl(`/area-aluno.html?v=${BUILD}`)}}
 
 export function bindAuthBox(root=document){
  const loginForm=root.querySelector('#loginForm'),signupForm=root.querySelector('#signupForm'),loginTab=root.querySelector('#loginTab'),signupTab=root.querySelector('#signupTab'),forgot=root.querySelector('#forgotLink'),forgotBox=root.querySelector('#forgotBox'),resend=root.querySelector('#resendLink');
  if(!loginForm||!signupForm)return;
  const tab=s=>{loginTab?.classList.toggle('on',!s);signupTab?.classList.toggle('on',s);loginForm.hidden=s;signupForm.hidden=!s;if(forgotBox)forgotBox.hidden=true};
  loginTab?.addEventListener('click',()=>tab(false));signupTab?.addEventListener('click',()=>tab(true));
+ root.addEventListener('click',e=>{const b=e.target.closest('[data-toggle-password]');if(!b)return;const input=b.parentElement?.querySelector('input[type="password"],input[data-password-field]');if(!input)return;const reveal=input.type==='password';input.type=reveal?'text':'password';input.dataset.passwordField='1';b.textContent=reveal?'Ocultar':'Mostrar';b.setAttribute('aria-pressed',String(reveal))});
  loginForm.addEventListener('submit',async e=>{e.preventDefault();const btn=loginForm.querySelector('button[type=submit]');setBusy(btn,true,'Entrando…');try{await login(loginForm.querySelector('[name=email]').value,loginForm.querySelector('[name=password]').value);location.reload()}catch(err){flash(authMessage(err),'bad',9000);setBusy(btn,false)}});
  signupForm.addEventListener('submit',async e=>{
   e.preventDefault();
@@ -50,10 +52,10 @@ export function bindAuthBox(root=document){
    loginForm.querySelector('[name=password]').value=password;
    setBusy(btn,true,'Entrando…');
    await login(email,password);
-   location.href=`/area-aluno.html?v=${BUILD}`;
+   location.href=publicUrl(`/area-aluno.html?v=${BUILD}`);
   }catch(err){flash(authMessage(err),'bad',12000);setBusy(btn,false)}
  });
- forgot?.addEventListener('click',e=>{e.preventDefault();if(forgotBox){forgotBox.hidden=false;forgotBox.querySelector('[name=email]').value=loginForm.querySelector('[name=email]').value||''}});
+ forgot?.addEventListener('click',e=>{e.preventDefault();if(forgotBox){forgotBox.hidden=false;forgotBox.querySelector('[name=email]').value=loginForm.querySelector('[name=email]').value||'';forgotBox.querySelector('[name=email]')?.focus()}});
  forgotBox?.addEventListener('submit',async e=>{e.preventDefault();const btn=forgotBox.querySelector('button[type=submit]');setBusy(btn,true,'Enviando…');try{await requestPasswordReset(forgotBox.querySelector('[name=email]').value);flash('Se houver uma conta com esse e-mail, enviaremos as instruções para redefinição.','ok',10000);forgotBox.hidden=true}catch(err){const s=String(err?.message||'');flash(s==='recovery_cooldown'?'Aguarde antes de solicitar outro e-mail de recuperação.':authMessage(err),'bad',10000)}finally{setBusy(btn,false)}});
  resend?.addEventListener('click',async e=>{e.preventDefault();const email=normalizeEmail(loginForm.querySelector('[name=email]').value);if(!email)return flash('Informe o e-mail no campo de login.','bad');try{await resendSignup(email);flash('Solicitação enviada. Verifique caixa de entrada e spam.','ok',10000)}catch(err){const s=String(err?.message||'');flash(s==='resend_cooldown'?'A confirmação já foi solicitada. Aguarde antes de tentar novamente.':authMessage(err),'bad',10000)}})
 }
