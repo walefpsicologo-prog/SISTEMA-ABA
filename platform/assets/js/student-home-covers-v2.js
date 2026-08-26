@@ -1,16 +1,18 @@
 import {sb} from './config.js';
+import {CONFIG} from './config.js';
 import {esc,dt,flash,userError,currentUser,activeEnrollments,publicCourses,salePrice,money,q} from './api.js?v=20260817-stable1';
 import {bindAuthBox,logout} from './auth-registerfix1.js';
 import { courseCoverHTML } from './editorial-covers-v2.js';
 
-const COURSE_BUILD='20260817-stable1';
+const COURSE_BUILD='20260826-production1';
+const publicUrl=path=>`${CONFIG.SITE_URL}${String(path||'').startsWith('/')?'':'/'}${path||''}`;
 const auth=q('#authGate'),home=q('#studentHome'),actions=q('#loggedActions');
 bindAuthBox(document);
 q('#logoutBtn')?.addEventListener('click',logout);
 
 const sourceLabel=s=>({checkout:'Matrícula paga',scholarship:'Bolsa integral',courtesy:'Cortesia',manual_free:'Gratuidade',external_payment:'Pagamento externo',coupon:'Cupom'})[s]||'Matrícula ativa';
-const ownedCard=e=>`<article class="student-course-card" aria-label="${esc(e.courses?.title||'Curso')}">${courseCoverHTML(e.courses||{})}<div class="wt-student-summary"><span class="badge-access">${esc(sourceLabel(e.source))}</span>${e.access_ends_at?`<p><strong>Acesso até:</strong> ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'}).format(new Date(e.access_ends_at))}</p>`:''}<div class="actions"><a class="btn" href="/curso-aluno.html?v=${COURSE_BUILD}&curso=${encodeURIComponent(e.course_id)}">Entrar no curso</a></div></div></article>`;
-const availableCard=c=>{const price=salePrice(c);return `<article class="student-course-card" aria-label="${esc(c.title)}">${courseCoverHTML(c)}<div class="wt-student-summary"><span class="badge-access">Disponível para matrícula</span><p><strong>${Number(c.workload_hours)} horas</strong>${c.access_days?` · ${esc(c.access_days)} dias de acesso`:''}</p><div class="course-price"><strong>${money(price)}</strong></div><div class="actions"><a class="btn" href="/matricula.html?curso=${encodeURIComponent(c.slug)}">Matricular-se</a><a class="btn secondary" href="/curso-aplicador-aba.html?slug=${encodeURIComponent(c.slug)}">Conhecer o curso</a></div></div></article>`};
+const ownedCard=e=>`<article class="student-course-card" aria-label="${esc(e.courses?.title||'Curso')}">${courseCoverHTML(e.courses||{})}<div class="wt-student-summary"><span class="badge-access">${esc(sourceLabel(e.source))}</span>${e.access_ends_at?`<p><strong>Acesso até:</strong> ${new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'}).format(new Date(e.access_ends_at))}</p>`:''}<div class="actions"><a class="btn" href="${publicUrl(`/curso-aluno.html?v=${COURSE_BUILD}&curso=${encodeURIComponent(e.course_id)}`)}">Entrar no curso</a></div></div></article>`;
+const availableCard=c=>{const price=salePrice(c);return `<article class="student-course-card" aria-label="${esc(c.title)}">${courseCoverHTML(c)}<div class="wt-student-summary"><span class="badge-access">Disponível para matrícula</span><p><strong>${Number(c.workload_hours)} horas</strong>${c.access_days?` · ${esc(c.access_days)} dias de acesso`:''}</p><div class="course-price"><strong>${money(price)}</strong></div><div class="actions"><a class="btn" href="${publicUrl(`/matricula.html?curso=${encodeURIComponent(c.slug)}`)}">Matricular-se</a><a class="btn secondary" href="${publicUrl(`/curso-aplicador-aba.html?slug=${encodeURIComponent(c.slug)}`)}">Conhecer o curso</a></div></div></article>`};
 
 async function boot(){
   try{
