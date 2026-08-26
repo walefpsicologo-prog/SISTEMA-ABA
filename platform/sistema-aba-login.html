@@ -3,34 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="theme-color" content="#0f2a5a">
 <title>Sistema ABA | Walef Teixeira</title>
 <link rel="stylesheet" href="/assets/css/sistema-aba.css">
 <link rel="stylesheet" href="/assets/css/sistema-aba-brand.css">
 </head>
 <body class="aba-login-page">
-<main class="aba-login-card">
-  <a href="/" class="aba-login-brand" style="text-decoration:none" aria-label="Walef Teixeira — site oficial">
+<main class="aba-login-card" aria-labelledby="abaLoginTitle">
+  <a href="/" class="aba-login-brand" aria-label="Walef Teixeira — site oficial">
     <span class="aba-site-logo" aria-hidden="true"><img src="https://walef-teixeira-oficial.vercel.app/assets/media/walef-logo-blue.svg" alt="" width="768" height="225"></span>
     <span><h1>Walef Teixeira</h1><p>Psicólogo · CRP 05/85580</p></span>
   </a>
   <span class="aba-product-kicker">Sistema ABA · área clínica protegida</span>
-  <h2 style="margin:0;font-size:22px">Acesso ao sistema</h2>
-  <p style="font-size:12px;line-height:1.55;color:#646d7e">O mesmo login identifica automaticamente administrador, equipe aplicadora e pais/responsáveis e abre apenas a área permitida para cada perfil.</p>
-  <form id="abaLoginForm" class="aba-form" autocomplete="on">
-    <div class="aba-field"><label for="abaEmail">E-mail</label><input id="abaEmail" name="email" type="email" autocomplete="username" required></div>
-    <div class="aba-field"><label for="abaPassword">Senha</label><input id="abaPassword" name="password" type="password" autocomplete="current-password" required></div>
-    <div id="abaLoginMessage" class="aba-login-message" aria-live="polite"></div>
-    <button class="aba-btn" type="submit">Entrar no Sistema ABA</button>
+  <h2 id="abaLoginTitle">Acesso ao sistema</h2>
+  <p class="aba-login-intro">Use sua conta profissional ou de responsável. O sistema identifica o perfil e libera somente os recursos autorizados.</p>
+  <form id="abaLoginForm" class="aba-form" autocomplete="on" novalidate>
+    <div class="aba-field"><label for="abaEmail">E-mail</label><input id="abaEmail" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="abaLoginMessage"></div>
+    <div class="aba-field aba-password-field"><label for="abaPassword">Senha</label><div class="aba-password-control"><input id="abaPassword" name="password" type="password" autocomplete="current-password" required aria-describedby="abaLoginMessage"><button class="aba-password-toggle" type="button" id="abaPasswordToggle" aria-controls="abaPassword" aria-pressed="false">Mostrar</button></div></div>
+    <div id="abaLoginMessage" class="aba-login-message" role="status" aria-live="polite" aria-atomic="true"></div>
+    <button class="aba-btn aba-login-submit" type="submit">Entrar no Sistema ABA</button>
   </form>
-  <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:12px">
+  <div class="aba-login-actions">
     <button class="aba-btn ghost small" type="button" id="abaForgot">Recuperar senha</button>
     <button class="aba-btn ghost small" type="button" id="abaParentHint">Sou pai/responsável</button>
     <a class="aba-btn ghost small" href="/">Voltar ao site</a>
   </div>
-  <p class="aba-login-note">Dados clínicos não são exibidos publicamente. O acesso é controlado por vínculo e função, com trilha de auditoria.</p>
+  <p class="aba-login-note">Dados clínicos não são exibidos publicamente. O acesso é controlado por autenticação, vínculo e função, com trilha de auditoria.</p>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js" integrity="sha384-" crossorigin="anonymous"></script>
 <script type="module" src="/assets/js/sistema-aba-login.js"></script>
 </body>
 </html>
