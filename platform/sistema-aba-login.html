@@ -15,8 +15,8 @@
     <span><h1>Walef Teixeira</h1><p>Psicólogo · CRP 05/85580</p></span>
   </a>
   <span class="aba-product-kicker">Sistema ABA · área clínica protegida</span>
-  <h2 style="margin:0;font-size:22px">Acesso clínico</h2>
-  <p style="font-size:12px;line-height:1.55;color:#646d7e">Prontuários, avaliações, protocolos, programas, aplicações, supervisões e monitoramento. O acesso depende de vínculo profissional ativo.</p>
+  <h2 style="margin:0;font-size:22px">Acesso ao sistema</h2>
+  <p style="font-size:12px;line-height:1.55;color:#646d7e">O mesmo login identifica automaticamente administrador, equipe aplicadora e pais/responsáveis e abre apenas a área permitida para cada perfil.</p>
   <form id="abaLoginForm" class="aba-form" autocomplete="on">
     <div class="aba-field"><label for="abaEmail">E-mail</label><input id="abaEmail" name="email" type="email" autocomplete="username" required></div>
     <div class="aba-field"><label for="abaPassword">Senha</label><input id="abaPassword" name="password" type="password" autocomplete="current-password" required></div>
@@ -25,9 +25,10 @@
   </form>
   <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:12px">
     <button class="aba-btn ghost small" type="button" id="abaForgot">Recuperar senha</button>
+    <button class="aba-btn ghost small" type="button" id="abaParentHint">Sou pai/responsável</button>
     <a class="aba-btn ghost small" href="/">Voltar ao site</a>
   </div>
-  <p class="aba-login-note">Dados clínicos não são exibidos publicamente. O módulo utiliza autenticação do Supabase, RLS por vínculo profissional e trilha de auditoria.</p>
+  <p class="aba-login-note">Dados clínicos não são exibidos publicamente. O acesso é controlado por vínculo e função, com trilha de auditoria.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <script type="module" src="/assets/js/sistema-aba-login.js"></script>
