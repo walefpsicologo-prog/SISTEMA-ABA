@@ -1,0 +1,26 @@
+name: Protocol Source Extract
+on:
+  push:
+    branches: [feature/sistema-aba-wt]
+    paths:
+      - '.github/workflows/protocol-source-extract.yml'
+      - 'tools/protocol-source-extract.mjs'
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tools/protocol-source-extract.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: protocol-source-text
+          path: protocol-source-out/
+          retention-days: 1
