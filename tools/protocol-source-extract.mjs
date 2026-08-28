@@ -39,7 +39,24 @@ for (const [name,url] of Object.entries(sources)) {
     const html=await page.content();
     await writeFile(`protocol-source-out/${name}.txt`,text,'utf8');
     await writeFile(`protocol-source-out/${name}.html`,html,'utf8');
-    manifest[name]={url,status:response?.status()??null,title,textLength:text.length,htmlLength:html.length,prefix:text.slice(0,250)};
+    let downloadHref=null, downloadStatus=null, downloadType=null, downloadBytes=0, pdfSaved=false;
+    const link=page.locator('a:has-text("DOWNLOAD FILE")').first();
+    if(await link.count()){
+      downloadHref=await link.getAttribute('href');
+      if(downloadHref){
+        const absolute=new URL(downloadHref,url).href;
+        const dr=await context.request.get(absolute,{timeout:90000,headers:{Referer:url}});
+        const body=await dr.body();
+        downloadStatus=dr.status();downloadType=dr.headers()['content-type']||'';downloadBytes=body.length;
+        await writeFile(`protocol-source-out/${name}.download.bin`,body);
+        if(body.length>4 && body.subarray(0,4).toString()==='%PDF'){
+          await writeFile(`protocol-source-out/${name}.pdf`,body);pdfSaved=true;
+        } else {
+          await writeFile(`protocol-source-out/${name}.download.html`,body);
+        }
+      }
+    }
+    manifest[name]={url,status:response?.status()??null,title,textLength:text.length,htmlLength:html.length,prefix:text.slice(0,250),downloadHref,downloadStatus,downloadType,downloadBytes,pdfSaved};
   } catch(e) { manifest[name]={url,error:String(e?.stack||e)}; }
   finally { await page.close(); }
 }
