@@ -9,6 +9,7 @@ const sources = {
   afls_domestic: 'https://pdfcoffee.com/afls-habilidades-vida-domestica-pdf-free.html',
   afls_community: 'https://pdfcoffee.com/afls-participaao-comunitaria-fp-pdf-free.html',
   afls_school: 'https://pdfcoffee.com/afls-habilidades-escolares-pdf-free.html',
+  afls_school_alt: 'https://pdfcoffee.com/afls-hab-escolares-pdf-free.html',
   afls_independent: 'https://pdfcoffee.com/afls-habilidades-de-vida-funcional-pdf-free.html',
   afls_vocational_1: 'https://pdfcoffee.com/afls-habilidades-vocacionais-part-1-pdf-free.html',
   afls_vocational_2: 'https://pdfcoffee.com/afls-habilidades-vocacionais-part-2-pdf-free.html'
