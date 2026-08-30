@@ -1,5 +1,5 @@
 import { sb } from './config.js';
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 let summaries=new Map(),loading=false,activeAssessmentId='',queued=false;
 const fmt=n=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:1});
 async function fetchSummaries(){if(loading)return;const ids=[...new Set($$('[data-assessment-open]').map(b=>b.dataset.assessmentOpen).filter(Boolean))];const missing=ids.filter(id=>!summaries.has(id));if(!missing.length)return;loading=true;try{const {data,error}=await sb.from('aba_assessment_summaries').select('*').in('assessment_id',missing).neq('status','archived');if(error)throw error;missing.forEach(id=>summaries.set(id,null));(data||[]).forEach(x=>summaries.set(x.assessment_id,x));}catch(e){console.warn('assessment_summary',e)}finally{loading=false}}
