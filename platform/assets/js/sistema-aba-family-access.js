@@ -1,4 +1,5 @@
 import { sb, CONFIG } from './config.js';
+import('./sistema-aba-prompt-taxonomy-admin.js').catch(e=>console.error('prompt taxonomy admin',e));
 const $=s=>document.querySelector(s);const endpoint=`${CONFIG.SUPABASE_URL}/functions/v1/aba-family-guardian-access`;let queued=false,lastClient='',links=[];
 async function session(){return (await sb.auth.getSession()).data.session}
 async function request(clientId,opts={}){const s=await session();if(!s)throw new Error('Sessão expirada.');const r=await fetch(opts.method==='POST'?endpoint:`${endpoint}?client_id=${encodeURIComponent(clientId)}`,{method:opts.method||'GET',headers:{Authorization:`Bearer ${s.access_token}`,apikey:CONFIG.SUPABASE_KEY,...(opts.body?{'Content-Type':'application/json'}:{})},body:opts.body?JSON.stringify(opts.body):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Falha no acesso familiar.');return j}
