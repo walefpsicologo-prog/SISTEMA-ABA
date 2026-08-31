@@ -1,0 +1,16 @@
+:root{--walef-logo-official:url('/assets/media/walef-logo-official.svg')}
+.aba-site-logo,.aba-mark{background:var(--walef-logo-official) center/contain no-repeat!important;filter:none!important}
+.aba-site-logo img,.aba-mark img{opacity:0!important;visibility:hidden!important}
+.aba-login-brand{display:flex!important;align-items:center!important;justify-content:center!important;padding:4px 0 22px!important}
+.aba-login-brand .aba-site-logo,.aba-login-brand .aba-mark{width:min(360px,92vw)!important;height:92px!important;min-width:0!important}
+.aba-login-brand>span:last-child{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important}
+.aba-sidebar .aba-brand{background:#fff!important;margin:-18px -16px 16px!important;padding:15px 16px 12px!important;border-bottom:1px solid rgba(8,26,59,.12)!important;align-items:center!important;box-shadow:0 8px 20px rgba(8,26,59,.08)!important}
+.aba-sidebar .aba-brand .aba-site-logo,.aba-sidebar .aba-brand .aba-mark{width:100%!important;max-width:232px!important;min-width:0!important;height:66px!important}
+.aba-sidebar .aba-brand>div{width:100%!important;text-align:center!important}
+.aba-sidebar .aba-brand>div h1,.aba-sidebar .aba-brand>div p{display:none!important}
+.aba-sidebar .aba-brand-product,.aba-sidebar .aba-brand>div::after{color:#0f2a5a!important;margin-top:1px!important;letter-spacing:.15em!important}
+.role-side .role-logo{display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;margin:-18px -18px 18px!important;padding:14px 18px 12px!important;min-height:86px!important;border-bottom:1px solid rgba(8,26,59,.12)!important;box-shadow:0 8px 20px rgba(8,26,59,.08)!important}
+.role-side .role-logo img{content:url('/assets/media/walef-logo-official.svg')!important;display:block!important;width:100%!important;height:62px!important;object-fit:contain!important;filter:none!important}
+.role-kicker{margin-top:0!important}
+@media(max-width:820px){.aba-sidebar .aba-brand{margin:-14px -12px 12px!important;padding:12px!important}.aba-sidebar .aba-brand .aba-site-logo,.aba-sidebar .aba-brand .aba-mark{height:58px!important;max-width:205px!important}}
+@media(max-width:520px){.aba-login-brand .aba-site-logo,.aba-login-brand .aba-mark{height:80px!important;width:min(330px,94vw)!important}.role-side .role-logo{margin:-12px -12px 14px!important;padding:10px 12px!important;min-height:72px!important}.role-side .role-logo img{height:52px!important}}
