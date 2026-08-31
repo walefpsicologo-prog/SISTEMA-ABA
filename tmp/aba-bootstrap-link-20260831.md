@@ -1,0 +1,1 @@
+[executar](https://olegdikznieawsiaqtnr.supabase.co/functions/v1/aba-create-admin-once?k=LfewTq0spVIJAIvfpEleBl8bvsWV76ZK)
