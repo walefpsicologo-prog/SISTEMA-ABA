@@ -1,7 +1,7 @@
 :root{--wt-brand-ink:#101b3f;--wt-brand-surface:#f8fafc;--wt-brand-soft:#eef3f8;--wt-brand-line:#d9e1eb}
 
 /* Official brand asset: integrated into the interface, never shown as a pasted white rectangle. */
-.aba-site-logo,.role-logo{background:url('https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/media/walef-logo-official.svg?v=20260831-official-logo') left center/contain no-repeat!important}
+.aba-site-logo,.role-logo{background:url('https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/media/walef-logo-official.svg?v=20260831-official-logo-v2') left center/contain no-repeat!important}
 .aba-site-logo img,.role-logo img{opacity:0!important;visibility:hidden!important}
 
 /* Login: brand is part of the card hierarchy, not a detached banner. */
