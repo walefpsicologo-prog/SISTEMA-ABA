@@ -1,0 +1,51 @@
+:root{--wt-brand-ink:#101b3f;--wt-brand-surface:#f8fafc;--wt-brand-soft:#eef3f8;--wt-brand-line:#d9e1eb}
+
+/* Official brand asset: integrated into the interface, never shown as a pasted white rectangle. */
+.aba-site-logo,.role-logo{background:url('https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/media/walef-logo-official.svg?v=20260831-official-logo') left center/contain no-repeat!important}
+.aba-site-logo img,.role-logo img{opacity:0!important;visibility:hidden!important}
+
+/* Login: brand is part of the card hierarchy, not a detached banner. */
+.aba-login-card{border-top:0!important;padding-top:26px!important}
+.aba-login-brand{display:flex!important;justify-content:center!important;align-items:center!important;padding:2px 0 22px!important;border-bottom:1px solid var(--aba-line)!important}
+.aba-login-brand .aba-site-logo{width:min(350px,88vw)!important;height:72px!important;min-width:0!important;background-position:center!important}
+.aba-login-brand>span:last-child{display:none!important}
+.aba-login-card .aba-product-kicker{text-align:center!important;margin-top:18px!important}
+.aba-login-card>h2{text-align:center!important}
+.aba-login-intro{text-align:center!important;max-width:380px!important;margin-left:auto!important;margin-right:auto!important}
+
+/* Main clinical shell: light institutional rail lets the navy mark live naturally in the layout. */
+.aba-sidebar{background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 100%)!important;color:var(--aba-ink)!important;border-right:1px solid var(--wt-brand-line)!important;box-shadow:8px 0 28px rgba(15,42,90,.035)!important}
+.aba-brand{padding:4px 2px 17px!important;margin-bottom:13px!important;border-bottom:1px solid var(--wt-brand-line)!important;gap:4px!important}
+.aba-brand .aba-site-logo{width:220px!important;height:48px!important;min-width:220px!important;background-position:left center!important}
+.aba-brand>div h1,.aba-brand>div p{display:none!important}
+.aba-brand-product,.aba-brand>div:empty::after,.aba-brand>div::after{color:var(--aba-blue)!important;font-size:9px!important;letter-spacing:.16em!important;margin-top:3px!important}
+.aba-userbox{background:var(--wt-brand-soft)!important;border:1px solid #dfe6ef!important;color:var(--aba-ink)!important}
+.aba-userbox span{color:var(--aba-muted)!important}
+.aba-nav button{color:#304761!important;border:1px solid transparent!important}
+.aba-nav button:hover{background:#edf2f7!important;color:var(--aba-navy)!important}
+.aba-nav button.active{background:var(--aba-navy)!important;color:#fff!important;box-shadow:0 5px 14px rgba(15,42,90,.16)!important}
+.aba-sidebar-bottom .aba-btn.secondary{background:#fff!important;color:var(--aba-navy)!important;border-color:#cfd8e5!important}
+.aba-sidebar-bottom .aba-btn.ghost{color:#40536a!important;border-color:#d7dfe9!important}
+
+/* Applicator and family portals use the same institutional rail. */
+.role-side{background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 100%)!important;color:#172033!important;border-right:1px solid var(--wt-brand-line)!important;box-shadow:8px 0 28px rgba(15,42,90,.035)!important}
+.role-logo{width:220px!important;height:48px!important;background-position:left center!important}
+.role-kicker{color:var(--wt-blue)!important;padding-top:2px!important}
+.role-user{background:var(--wt-brand-soft)!important;border:1px solid #dfe6ef!important;color:#26384f!important}
+.role-nav button{color:#304761!important;border:1px solid transparent!important}
+.role-nav button:hover{background:#edf2f7!important;color:var(--wt-navy)!important}
+.role-nav button.active{background:var(--wt-navy)!important;color:#fff!important;box-shadow:0 5px 14px rgba(15,42,90,.16)!important}
+.role-side-bottom .role-btn.secondary{background:#fff!important;color:var(--wt-navy)!important;border-color:#cfd8e5!important}
+.role-side-bottom .role-btn.ghost{color:#40536a!important;border-color:#d7dfe9!important}
+
+/* Small-screen integration: logo remains proportional and the rail becomes a clean top identity band. */
+@media(max-width:900px){
+  .aba-sidebar{background:#fff!important}
+  .aba-brand{align-items:flex-start!important}
+  .aba-brand .aba-site-logo,.role-logo{width:190px!important;height:42px!important;min-width:190px!important}
+  .role-side{background:#fff!important;border-right:0!important;border-bottom:1px solid var(--wt-brand-line)!important;box-shadow:0 6px 22px rgba(15,42,90,.035)!important}
+}
+@media(max-width:520px){
+  .aba-login-brand .aba-site-logo{width:min(310px,88vw)!important;height:64px!important}
+  .aba-brand .aba-site-logo,.role-logo{width:175px!important;height:38px!important;min-width:175px!important}
+}
