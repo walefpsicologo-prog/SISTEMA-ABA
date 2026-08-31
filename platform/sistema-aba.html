@@ -12,49 +12,14 @@
 <body>
 <div class="aba-shell">
   <aside class="aba-sidebar aba-no-print">
-    <div class="aba-brand">
-      <span class="aba-site-logo" aria-hidden="true"><img src="https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/media/walef-logo-official.svg?v=20260831-official-logo-v2" alt="" width="1536" height="450"></span>
-      <div><h1>Walef Teixeira</h1><p>Psicólogo · CRP 05/85580</p><div class="aba-brand-product">Sistema ABA</div></div>
-    </div>
+    <div class="aba-brand"><span class="aba-site-logo" aria-hidden="true"><img src="https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/media/walef-logo-official.svg?v=20260831-official-logo-v2" alt="" width="1536" height="450"></span><div><h1>Walef Teixeira</h1><p>Psicólogo · CRP 05/85580</p><div class="aba-brand-product">Sistema ABA</div></div></div>
     <div class="aba-userbox"><b id="abaUserName">Carregando acesso…</b><span id="abaUserRole">—</span></div>
-    <nav class="aba-nav" id="abaNav">
-      <button class="active" data-view="dashboard">Painel clínico</button>
-      <button data-view="clients">Clientes</button>
-      <button data-view="professionals">Profissionais</button>
-      <button data-view="protocols">Protocolos</button>
-      <button data-view="assessments">Avaliações</button>
-      <button data-view="programs">Programas e metas</button>
-      <button data-view="sessions">Aplicador / sessões</button>
-      <button data-view="behavior">Comportamento e preferência</button>
-      <button data-view="supervision">Supervisão</button>
-      <button data-view="monitor">Monitoramento</button>
-      <button data-view="reports">Relatórios</button>
-      <button data-view="audit">Auditoria</button>
-    </nav>
-    <div class="aba-sidebar-bottom">
-      <a class="aba-btn secondary" href="/">Site Walef Teixeira</a>
-      <button class="aba-btn ghost" id="abaLogout">Sair</button>
-    </div>
+    <nav class="aba-nav" id="abaNav"><button class="active" data-view="dashboard">Painel clínico</button><button data-view="clients">Clientes</button><button data-view="professionals">Profissionais</button><button data-view="protocols">Protocolos</button><button data-view="assessments">Avaliações</button><button data-view="programs">Programas e metas</button><button data-view="sessions">Aplicador / sessões</button><button data-view="behavior">Comportamento e preferência</button><button data-view="supervision">Supervisão</button><button data-view="monitor">Monitoramento</button><button data-view="reports">Relatórios</button><button data-view="audit">Auditoria</button></nav>
+    <div class="aba-sidebar-bottom"><a class="aba-btn secondary" href="/">Site Walef Teixeira</a><button class="aba-btn ghost" id="abaLogout">Sair</button></div>
   </aside>
-
   <main class="aba-main">
-    <header class="aba-topbar aba-no-print">
-      <div><span class="aba-product-kicker">Walef Teixeira · Sistema ABA</span><h2 id="abaViewTitle">Painel clínico</h2><p id="abaViewSubtitle">Avaliar → planejar → aplicar → monitorar → reavaliar.</p></div>
-      <div class="aba-top-actions"><select id="abaActiveClient" class="aba-field" style="min-width:220px;padding:9px;border:1px solid #c9cfda;border-radius:6px"><option value="">Selecionar cliente</option></select><button class="aba-btn secondary" id="abaRefresh">Atualizar</button></div>
-    </header>
-
-    <section id="abaView-dashboard" class="aba-view active"></section>
-    <section id="abaView-clients" class="aba-view"></section>
-    <section id="abaView-professionals" class="aba-view"></section>
-    <section id="abaView-protocols" class="aba-view"></section>
-    <section id="abaView-assessments" class="aba-view"></section>
-    <section id="abaView-programs" class="aba-view"></section>
-    <section id="abaView-sessions" class="aba-view"></section>
-    <section id="abaView-behavior" class="aba-view"></section>
-    <section id="abaView-supervision" class="aba-view"></section>
-    <section id="abaView-monitor" class="aba-view"></section>
-    <section id="abaView-reports" class="aba-view"></section>
-    <section id="abaView-audit" class="aba-view"></section>
+    <header class="aba-topbar aba-no-print"><div><span class="aba-product-kicker">Walef Teixeira · Sistema ABA</span><h2 id="abaViewTitle">Painel clínico</h2><p id="abaViewSubtitle">Avaliar → planejar → aplicar → monitorar → reavaliar.</p></div><div class="aba-top-actions"><select id="abaActiveClient" class="aba-field" style="min-width:220px;padding:9px;border:1px solid #c9cfda;border-radius:6px"><option value="">Selecionar cliente</option></select><button class="aba-btn secondary" id="abaRefresh">Atualizar</button></div></header>
+    <section id="abaView-dashboard" class="aba-view active"></section><section id="abaView-clients" class="aba-view"></section><section id="abaView-professionals" class="aba-view"></section><section id="abaView-protocols" class="aba-view"></section><section id="abaView-assessments" class="aba-view"></section><section id="abaView-programs" class="aba-view"></section><section id="abaView-sessions" class="aba-view"></section><section id="abaView-behavior" class="aba-view"></section><section id="abaView-supervision" class="aba-view"></section><section id="abaView-monitor" class="aba-view"></section><section id="abaView-reports" class="aba-view"></section><section id="abaView-audit" class="aba-view"></section>
   </main>
 </div>
 <div class="aba-modal" id="abaModal" role="dialog" aria-modal="true" aria-labelledby="abaModalTitle"><div class="aba-modal-box"><h3 id="abaModalTitle">Cadastro</h3><div id="abaModalBody"></div><div class="aba-modal-actions"><button class="aba-btn secondary" id="abaModalCancel">Cancelar</button><button class="aba-btn" id="abaModalSave">Salvar</button></div></div></div>
@@ -63,9 +28,7 @@
 <script type="module" src="/assets/js/sistema-aba.js"></script>
 <script type="module" src="/assets/js/sistema-aba-enhancements.js"></script>
 <script type="module" src="https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/js/sistema-aba-session-delete.js?v=20260831-session-delete"></script>
-<script type="module" src="/assets/js/sistema-aba-automation-v36.js"></script>
-<script type="module" src="https://olegdikznieawsiaqtnr.supabase.co/functions/v1/sistema-aba-walef/assets/js/sistema-aba-therapeutic-workflow.js?v=20260831-v33-therapeutic-workflow"></script>
-<script type="module" src="/assets/js/sistema-aba-ui-v34.js"></script>
+<script type="module" src="/assets/js/sistema-aba-stable-v38.js"></script>
 <script type="module" src="/assets/js/sistema-aba-report-v2.js"></script>
 </body>
 </html>
