@@ -17,3 +17,7 @@ document.head.appendChild(hiddenGuard);
 export const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
+
+if(typeof location!=='undefined'&&(location.pathname.includes('sistema-aba')||location.hostname.includes('walef-sistema-aba'))){
+  import('./sistema-aba-admin-credentials.js').catch(e=>console.error('admin credentials module',e));
+}
