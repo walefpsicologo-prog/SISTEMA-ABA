@@ -110,3 +110,15 @@ using (
   private.aba_can_manage_clinical()
   or (user_id = auth.uid() and active = true and private.aba_auth_version_matches(auth_version))
 );
+
+drop policy if exists aba_protocol_sections_admin_all on public.aba_protocol_sections;
+create policy aba_protocol_sections_admin_all on public.aba_protocol_sections
+for all to authenticated
+using (private.aba_is_admin())
+with check (private.aba_is_admin());
+
+drop policy if exists aba_protocol_sources_admin_all on public.aba_protocol_sources;
+create policy aba_protocol_sources_admin_all on public.aba_protocol_sources
+for all to authenticated
+using (private.aba_is_admin())
+with check (private.aba_is_admin());
