@@ -17,7 +17,7 @@ async function resolveReturn(session){
     ]);
     if(memberQ.data||guardianQ.data?.length)return ABA_APP;
   }catch{}
-  if(email==='walefpsicologo@gmail.com')return ABA_APP;
+  if(email==='walefpsicologo@gmail.com'||email==='walefpsicologo+aba@gmail.com')return ABA_APP;
   return '/area-aluno.html';
 }
 
@@ -41,7 +41,23 @@ sb.auth.onAuthStateChange(async(event,session)=>{
   if(event==='PASSWORD_RECOVERY')await setRecoverySession(session,'Link de recuperação validado. Defina sua nova senha.');
 });
 
+async function consumeDirectRecoveryToken(){
+  const params=new URLSearchParams(location.search);
+  const token=params.get('token_hash')||params.get('token');
+  if(!token)return false;
+  q('#resetStatus').textContent='Validando o link de recuperação…';
+  const {data,error}=await sb.auth.verifyOtp({token_hash:token,type:'recovery'});
+  history.replaceState({},document.title,location.pathname);
+  if(error||!data?.session){
+    q('#resetStatus').textContent='Este link expirou ou já foi utilizado. Solicite um novo link.';
+    return true;
+  }
+  await setRecoverySession(data.session,'Link de recuperação validado. Defina sua nova senha.');
+  return true;
+}
+
 async function boot(){
+  if(await consumeDirectRecoveryToken())return;
   const {data:{session}}=await sb.auth.getSession();
   if(session)await setRecoverySession(session,'Sessão de recuperação válida. Defina sua nova senha.');
   else q('#resetStatus').textContent='Abra esta página a partir do link de recuperação enviado por e-mail.';
