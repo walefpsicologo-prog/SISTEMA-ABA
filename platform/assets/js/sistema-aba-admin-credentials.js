@@ -23,24 +23,27 @@ function installStyle(){
 function modal(currentEmail){
   let m=$('#abaCredentialModal');
   if(!m){m=document.createElement('div');m.id='abaCredentialModal';m.className='aba-credential-modal';document.body.appendChild(m)}
-  m.innerHTML=`<div class="aba-credential-box"><h3>Trocar credenciais do administrador</h3><p>Altere seu login sem criar outro prontuário profissional. O mesmo identificador interno e todos os vínculos clínicos permanecem preservados.</p><div class="aba-credential-grid"><div><label>E-mail atual</label><input value="${esc(currentEmail)}" disabled></div><div><label>Novo e-mail de login</label><input id="abaCredentialEmail" type="email" autocomplete="email" placeholder="novo-email@exemplo.com"></div><div><label>Nova senha</label><input id="abaCredentialPassword" type="password" autocomplete="new-password" placeholder="mínimo 14 caracteres"></div><div><label>Confirmar nova senha</label><input id="abaCredentialPassword2" type="password" autocomplete="new-password"></div></div><p>A senha deve ter pelo menos 14 caracteres, com maiúscula, minúscula, número e símbolo. O Supabase pode exigir confirmação do novo e-mail.</p><div id="abaCredentialMsg" class="aba-credential-msg"></div><div class="aba-credential-actions"><button class="secondary" id="abaCredentialCancel">Cancelar</button><button class="primary" id="abaCredentialSave">Trocar credenciais</button></div></div>`;
+  m.innerHTML=`<div class="aba-credential-box"><h3>Trocar credenciais do administrador</h3><p>Altere seu login sem criar outro prontuário profissional. O mesmo identificador interno e todos os vínculos clínicos permanecem preservados.</p><div class="aba-credential-grid"><div><label>E-mail atual</label><input value="${esc(currentEmail)}" disabled></div><div><label for="abaCredentialEmail">E-mail de login</label><input id="abaCredentialEmail" type="email" autocomplete="email" value="${esc(currentEmail)}"></div><div><label>Nova senha</label><input id="abaCredentialPassword" type="password" autocomplete="new-password" placeholder="mínimo 14 caracteres"></div><div><label>Confirmar nova senha</label><input id="abaCredentialPassword2" type="password" autocomplete="new-password"></div></div><p>A senha deve ter pelo menos 14 caracteres, com maiúscula, minúscula, número e símbolo. Mantenha o e-mail atual para trocar somente a senha. Alterações de e-mail podem exigir confirmação.</p><div id="abaCredentialMsg" class="aba-credential-msg"></div><div class="aba-credential-actions"><button class="secondary" id="abaCredentialCancel">Cancelar</button><button class="primary" id="abaCredentialSave">Trocar credenciais</button></div></div>`;
   m.classList.add('on');
   $('#abaCredentialCancel').onclick=()=>m.classList.remove('on');m.onclick=e=>{if(e.target===m)m.classList.remove('on')};
   $('#abaCredentialSave').onclick=async()=>{
-    const email=$('#abaCredentialEmail').value.trim().toLowerCase(),p=$('#abaCredentialPassword').value,p2=$('#abaCredentialPassword2').value,msg=$('#abaCredentialMsg'),btn=$('#abaCredentialSave');
+    const email=($('#abaCredentialEmail').value.trim()||currentEmail||'').toLowerCase(),p=$('#abaCredentialPassword').value,p2=$('#abaCredentialPassword2').value,msg=$('#abaCredentialMsg'),btn=$('#abaCredentialSave');
     const show=(t,type)=>{msg.textContent=t;msg.className=`aba-credential-msg on ${type}`};
-    if(!email||!/^\S+@\S+\.\S+$/.test(email))return show('Informe um novo e-mail válido.','bad');
+    if(!email||!/^\S+@\S+\.\S+$/.test(email))return show('Informe um e-mail válido.','bad');
     if(!isStrong(p))return show('A nova senha não atende aos requisitos de segurança.','bad');
     if(p!==p2)return show('As duas senhas não coincidem.','bad');
-    if(email===String(currentEmail||'').toLowerCase())return show('O novo e-mail precisa ser diferente do login atual.','bad');
-    if(!confirm('Confirmar a troca do e-mail de login e da senha do administrador?'))return;
+    const changingEmail=email!==String(currentEmail||'').toLowerCase();
+    if(!confirm(changingEmail?'Confirmar a troca do e-mail e da senha do administrador?':'Confirmar a troca da senha do administrador?'))return;
     btn.disabled=true;show('Atualizando credenciais…','ok');
     try{
-      const {data,error}=await sb.auth.updateUser({email,password:p,data:{module:'aba',aba_access:'admin'}});if(error)throw error;
+      const changes={password:p,data:{must_change_password:false}};if(changingEmail)changes.email=email;
+      const {data,error}=await sb.auth.updateUser(changes);if(error)throw error;
       const activeEmail=data?.user?.email||currentEmail;
-      if(activeEmail&&activeEmail!==currentEmail){await sb.from('aba_professionals').update({email:activeEmail,updated_at:new Date().toISOString(),notes:'Credenciais administrativas atualizadas pelo próprio administrador autenticado; identidade clínica preservada.'}).eq('user_id',data.user.id)}
+      let profileWarning=false;
+      if(activeEmail&&activeEmail!==currentEmail){const {error:profileError}=await sb.from('aba_professionals').update({email:activeEmail,updated_at:new Date().toISOString()}).eq('user_id',data.user.id);profileWarning=Boolean(profileError)}
       const pending=String(data?.user?.new_email||'').toLowerCase()===email.toLowerCase()&&String(activeEmail||'').toLowerCase()!==email.toLowerCase();
-      show(pending?'Senha alterada. O novo e-mail foi solicitado e precisa ser confirmado antes de substituir o login atual.':'Credenciais alteradas. O login anterior deixa de valer conforme a confirmação do Supabase.','ok');
+      const message=pending?'Senha alterada. Confirme o novo e-mail para concluir a mudança do login.':changingEmail?'E-mail e senha atualizados.':'Senha alterada. Seu e-mail de login permanece o mesmo.';
+      show(message+(profileWarning?' O e-mail do cadastro profissional ainda não foi sincronizado. Atualize a página.':''),profileWarning?'bad':'ok');
       $('#abaCredentialPassword').value='';$('#abaCredentialPassword2').value='';
     }catch(e){show(e?.message||'Não foi possível trocar as credenciais.','bad')}finally{btn.disabled=false}
   };
